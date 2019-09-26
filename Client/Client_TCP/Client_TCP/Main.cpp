@@ -1,17 +1,8 @@
-#include <iostream>
-//Base Lib for network in c++
-#include <WinSock2.h>
-#include <WS2tcpip.h>
-//Lib Linkage
-#pragma comment(lib, "Ws2_32.lib")
-
-#define IPV4 AF_INET
-#define TCP SOCK_STREAM
-#define TCP_SOCKET IPPROTO_TCP
+#include "Client.h"
 
 int main()
 {
-	//For start networking
+	/*//For start networking
 	WSADATA data;
 	if (WSAStartup(MAKEWORD(2, 2), &data) != SOCKET_ERROR)
 	{
@@ -50,5 +41,9 @@ int main()
 	if (WSACleanup() == SOCKET_ERROR)
 		std::cout << "Cleanup Error == " << WSAGetLastError() << std::endl;
 
-	system("PAUSE");
+	system("PAUSE");*/
+
+	Client * A = new Client();
+	A->StartClient(IPV4, TCP, TCP_SOCKET, "127.0.0.1", 6666);
+	A->StopClient();
 }

@@ -8,7 +8,7 @@ Server::Server()
 
 Server::Server(int Family, int Type, int Protocol, ULONG EntryAcceptances, unsigned int Port)
 {
-	if(LauncheServer(Family, Type, Protocol, EntryAcceptances, Port) == (SOCKET_ERROR || INVALID_SOCKET))
+	if(LauncheServer(Family, Type, Protocol, EntryAcceptances, Port) == SOCKET_ERROR)
 		LogSystem::ConsoleLog("Server Launch Failed");
 }
 
@@ -32,14 +32,14 @@ int Server::LauncheServer(int Family, int Type, int Protocol, ULONG S_Addr, unsi
 	m_EntryAcceptances = S_Addr;
 	m_Port = Port;
 
-	//For start networking
+	// Initialize Winsock
 	if (WSAStartup(MAKEWORD(2, 2), &m_Data) == SOCKET_ERROR)
 	{
 		LogSystem::ConsoleLog("Error : WSA Startup => SOCKET ERROR");
 		return NETWORK_ERROR;
 	}
 
-	//Socket creation
+	// Create a SOCKET for connecting to server
 	m_Socket = socket(m_Family, m_Type, m_Protocol);
 	if (m_Socket == INVALID_SOCKET)
 	{
@@ -51,15 +51,15 @@ int Server::LauncheServer(int Family, int Type, int Protocol, ULONG S_Addr, unsi
 	// 0 for autimaticaly choose a open PORT
 	m_Addr.sin_port = htons(m_Port);
 	m_Addr.sin_family = m_Family;
-
-	//Binding Address to Socket
+	
+	// Setup the TCP listening socket
 	if (bind(m_Socket, (struct sockaddr *) &m_Addr, sizeof(m_Addr)) == SOCKET_ERROR)
 	{
 		LogSystem::ConsoleLog("Error : Socket Binding => SOCKET ERROR");
 		return NETWORK_ERROR;
 	}
 
-	//BSet the server to listen
+	//Set the TCP server to listen
 	if (listen(m_Socket, SOMAXCONN) == SOCKET_ERROR)
 	{
 		LogSystem::ConsoleLog("Error : Server Listen => SOCKET ERROR");
@@ -69,6 +69,8 @@ int Server::LauncheServer(int Family, int Type, int Protocol, ULONG S_Addr, unsi
 	LogSystem::ConsoleLog("Server Lauched Succefuly");
 
 	m_State = true;
+
+	LogSystem::ConsoleLog(GetIP(m_Addr));
 
 	return SUCCES;
 }
@@ -80,6 +82,7 @@ SOCKET Server::PendingOfConnection()
 
 	SOCKET newClient;
 
+	// Accept a client socket
 	if (newClient = accept(m_Socket, (SOCKADDR*)& m_ConnectionAddress, &len) == INVALID_SOCKET)
 	{
 		LogSystem::ConsoleLog("Error : Invalid Socket");
@@ -111,4 +114,14 @@ int Server::CloseServer()
 	}
 	LogSystem::ConsoleLog("Error : Server Already Open");
 	return SERVER_ALREADY_OPEN;
+}
+
+char * Server::GetIP(sockaddr_in p_sockaddr_in)
+{
+	void* addr = &(p_sockaddr_in.sin_addr);
+	char Buffer[INET6_ADDRSTRLEN];
+	   
+	inet_ntop(p_sockaddr_in.sin_family, addr, (PSTR)Buffer, INET6_ADDRSTRLEN);
+
+	return Buffer;
 }

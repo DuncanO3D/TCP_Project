@@ -43,6 +43,8 @@ public:
 	SOCKET PendingOfConnection();
 	int CloseServer();
 
+	static char* GetIP(sockaddr_in addr);
+
 private:
 	WSADATA m_Data;
 
