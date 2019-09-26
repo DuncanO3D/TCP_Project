@@ -11,6 +11,8 @@
 #define TCP SOCK_STREAM
 #define TCP_SOCKET IPPROTO_TCP
 
+class TCPSocket;
+
 class Client
 {
 public:
@@ -21,6 +23,6 @@ public:
 	void StopClient();
 
 private:
-	TCPSocket * m_Socket;
+	TCPSocket * m_Socket = nullptr;
 };
 

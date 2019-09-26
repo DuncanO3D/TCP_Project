@@ -15,7 +15,6 @@ TCPSocket::TCPSocket(int Family, int Type, int Protocol)
 	}
 }
 
-
 TCPSocket::~TCPSocket()
 {
 	Sockets::CloseSocket(m_Socket);
@@ -30,4 +29,16 @@ bool TCPSocket::Connect(const std::string & ipaddress, unsigned short port)
 	server.sin_family = m_Family;
 	server.sin_port = htons(port);
 	return connect(m_Socket, (sockaddr*)&server, sizeof(server)) == 0;
+}
+
+int TCPSocket::Send(const unsigned char * data, unsigned short len)
+{
+	unsigned short networkLen = htons(len);
+
+	return send(m_Socket, reinterpret_cast<const char*>(&networkLen), sizeof(networkLen), 0);
+}
+
+int TCPSocket::Receive(char * buffer, unsigned int len)
+{
+	return recv(m_Socket, buffer, len, 0);
 }

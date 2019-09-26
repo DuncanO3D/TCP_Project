@@ -11,6 +11,9 @@ public:
 
 	bool Connect(const std::string& ipaddress, unsigned short port);
 
+	int Send(const unsigned char* data, unsigned short len);
+	int Receive(char* buffer, unsigned int len);
+
 private:
 	int m_Family;
 	int m_Type;
