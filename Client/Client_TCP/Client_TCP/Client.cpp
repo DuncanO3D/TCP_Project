@@ -16,7 +16,7 @@ void Client::StartClient(int Family, int Type, int Protocol, const char* IP, uns
 {	
 	if (Sockets::Start() == false)
 	{
-		std::cout << "Initialisation Error : " << Sockets::GetError() << std::endl;
+		std::cout << "Winsock Initialisation Error : " << Sockets::GetError() << std::endl;
 		return;
 	}
 	

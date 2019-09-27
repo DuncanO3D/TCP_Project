@@ -1,127 +1,99 @@
 #include "Server.h"
-
+#include "Sockets.h"
 #include "LogSystem.h"
 
 Server::Server()
 {
 }
 
-Server::Server(int Family, int Type, int Protocol, ULONG EntryAcceptances, unsigned int Port)
-{
-	if(LauncheServer(Family, Type, Protocol, EntryAcceptances, Port) == SOCKET_ERROR)
-		LogSystem::ConsoleLog("Server Launch Failed");
-}
-
 Server::~Server()
 {
-	if (m_State == true)
-		CloseServer();
 }
 
-int Server::LauncheServer(int Family, int Type, int Protocol, ULONG S_Addr, unsigned int Port)
+bool Server::LauncheServer(unsigned int Port)
 {
-	if (m_State == true)
+	//Winsock Init
+	if (Sockets::Start() == false)
 	{
-		LogSystem::ConsoleLog("Error : Server Already Open");
-		return SERVER_ALREADY_OPEN;
+		std::cout << "Winsock Initialisation Error : " << Sockets::GetError() << std::endl;
+		return false;
 	}
 
-	m_Family = Family;
-	m_Type = Type;
-	m_Protocol = Protocol;
-	m_EntryAcceptances = S_Addr;
-	m_Port = Port;
+	//Socket Init
+	if (InitSocket() == false)
+		return false;
 
-	// Initialize Winsock
-	if (WSAStartup(MAKEWORD(2, 2), &m_Data) == SOCKET_ERROR)
+	//Addr Binding
+	if (BindAddr(Port) == false)
+		return false;
+
+	//Set Server to listen
+	if (SetServerToListen() == false)
+		return false;
+
+	std::cout << "Server Launched on port " << Port << std::endl;
+
+	return true;
+}
+
+bool Server::AcceptClient(sockaddr_in& ClientAddr)
+{
+	ClientAddr = { 0 };
+	int Lenght = sizeof(ClientAddr);
+
+	SOCKET newClient = accept(m_Socket, (sockaddr*)&ClientAddr, &Lenght);
+	if (newClient == INVALID_SOCKET)
 	{
-		LogSystem::ConsoleLog("Error : WSA Startup => SOCKET ERROR");
-		return NETWORK_ERROR;
+		std::cout << "Socket accept Error : " << Sockets::GetError() << std::endl;
+		return false;
 	}
 
-	// Create a SOCKET for connecting to server
-	m_Socket = socket(m_Family, m_Type, m_Protocol);
+	std::cout << "Connection : " << Sockets::GetAdress(ClientAddr) << " on port " << ClientAddr.sin_port << std::endl;
+
+	return true;
+}
+
+void Server::CloseServer()
+{
+	Sockets::CloseSocket(m_Socket);
+	Sockets::Release();
+}
+
+
+bool Server::InitSocket()
+{
+	m_Socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (m_Socket == INVALID_SOCKET)
 	{
-		LogSystem::ConsoleLog("Error : Socket Creation => INVALID SOCKET");
-		return NETWORK_ERROR;
+		std::cout << "Socket Initialisation  Error : " << Sockets::GetError() << std::endl;
+		return false;
 	}
-
-	m_Addr.sin_addr.S_un.S_addr = m_EntryAcceptances;
-	// 0 for autimaticaly choose a open PORT
-	m_Addr.sin_port = htons(m_Port);
-	m_Addr.sin_family = m_Family;
-	
-	// Setup the TCP listening socket
-	if (bind(m_Socket, (struct sockaddr *) &m_Addr, sizeof(m_Addr)) == SOCKET_ERROR)
-	{
-		LogSystem::ConsoleLog("Error : Socket Binding => SOCKET ERROR");
-		return NETWORK_ERROR;
-	}
-
-	//Set the TCP server to listen
-	if (listen(m_Socket, SOMAXCONN) == SOCKET_ERROR)
-	{
-		LogSystem::ConsoleLog("Error : Server Listen => SOCKET ERROR");
-		return NETWORK_ERROR;
-	}
-
-	LogSystem::ConsoleLog("Server Lauched Succefuly");
-
-	m_State = true;
-
-	LogSystem::ConsoleLog(GetIP(m_Addr));
-
-	return SUCCES;
+	return true;
 }
 
-SOCKET Server::PendingOfConnection()
+bool Server::BindAddr(unsigned int Port)
 {
-	sockaddr_in m_ConnectionAddress = { 0 };
-	int len = sizeof(m_ConnectionAddress);
+	//Addr Binding
+	m_Addr.sin_addr.s_addr = INADDR_ANY; // All source accepted
+	m_Addr.sin_port = htons(Port);
+	m_Addr.sin_family = AF_INET; //TCP
 
-	SOCKET newClient;
-
-	// Accept a client socket
-	if (newClient = accept(m_Socket, (SOCKADDR*)& m_ConnectionAddress, &len) == INVALID_SOCKET)
+	int error = bind(m_Socket, (sockaddr*)&m_Addr, sizeof(m_Addr));
+	if (error != 0)
 	{
-		LogSystem::ConsoleLog("Error : Invalid Socket");
-		return INVALID_SOCKET;
+		std::cout << "Addr bind Error : " << Sockets::GetError() << std::endl;
+		return false;
 	}
-			
-	return newClient;
+	return true;
 }
 
-int Server::CloseServer()
+bool Server::SetServerToListen()
 {
-	if (m_State == true)
+	int error = listen(m_Socket, SOMAXCONN); //System Max Connection
+	if (error != 0)
 	{
-		if (closesocket(m_Socket) == SOCKET_ERROR)
-		{
-			LogSystem::ConsoleLog("Error : Close Socket => SOCKET ERROR");
-			return NETWORK_ERROR;
-		}
-
-		if (WSACleanup() == SOCKET_ERROR)
-		{
-			LogSystem::ConsoleLog("Error : WSA Cleanup => SOCKET ERROR");
-			return NETWORK_ERROR;
-		}
-
-		m_State = false;
-
-		return SUCCES;
+		std::cout << "Server listen Error : " << Sockets::GetError() << std::endl;
+		return false;
 	}
-	LogSystem::ConsoleLog("Error : Server Already Open");
-	return SERVER_ALREADY_OPEN;
-}
-
-char * Server::GetIP(sockaddr_in p_sockaddr_in)
-{
-	void* addr = &(p_sockaddr_in.sin_addr);
-	char Buffer[INET6_ADDRSTRLEN];
-	   
-	inet_ntop(p_sockaddr_in.sin_family, addr, (PSTR)Buffer, INET6_ADDRSTRLEN);
-
-	return Buffer;
+	return true;
 }
