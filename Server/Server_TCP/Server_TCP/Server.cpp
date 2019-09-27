@@ -175,8 +175,10 @@ bool Server::AcceptClient(sockaddr_in& ClientAddr, SOCKET& ClientSocket)
 	return true;
 }
 
+
 void Server::LauncheThreadClient(SOCKET newClient, sockaddr_in ClientAddr, Server* ThisServer)
 {
+	//Add Mutex if we need a control of thread order
 	std::thread([newClient, ClientAddr, ThisServer]()
 	{
 		std::string ClientAddress = Sockets::GetAdress(ClientAddr);
