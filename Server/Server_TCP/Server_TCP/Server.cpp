@@ -7,13 +7,42 @@
 
 Server::Server()
 {
+	m_Clients = new std::vector<Client>();
 }
 
 Server::~Server()
 {
+	StopServer();
+	delete m_Clients;
 }
 
-bool Server::LauncheServer(unsigned int Port)
+void Server::LaunchServer(unsigned int Port)
+{
+	InitServer(Port);
+
+	AcceptClients();
+}
+
+void Server::StopServer()
+{
+	CloseServer();
+}
+
+std::vector<std::string> Server::GetConnectedClients()
+{
+	std::vector<std::string> ClientsAdress = std::vector<std::string>();
+
+	for (int i = 0; i < m_Clients->size(); i++)
+	{
+		ClientsAdress.push_back(Sockets::GetAdress(m_Clients->at(i).m_addr));
+	}
+
+	return ClientsAdress;
+}
+
+
+
+bool Server::InitServer(unsigned int Port)
 {
 	//Winsock Init
 	if (Sockets::Start() == false)
@@ -39,33 +68,11 @@ bool Server::LauncheServer(unsigned int Port)
 	return true;
 }
 
-void Server::AcceptClients()
-{
-	//While whe have no error
-	do
-	{
-		sockaddr_in ClientAddr = { 0 };
-		SOCKET newClient;
-		if (AcceptClient(ClientAddr, newClient))
-		{
-			//Thread/Client
-			LauncheThreadClient(newClient, ClientAddr);
-		}
-		else
-		{
-			std::cout << "Socket accept Error : " << Sockets::GetError() << std::endl;
-			break;
-		}
-
-	} while (true);
-}
-
 void Server::CloseServer()
 {
 	Sockets::CloseSocket(m_Socket);
 	Sockets::Release();
 }
-
 
 bool Server::InitSocket()
 {
@@ -105,6 +112,55 @@ bool Server::SetServerToListen()
 	return true;
 }
 
+void Server::AcceptClients()
+{
+	//While whe have no error
+	do
+	{
+		sockaddr_in ClientAddr = { 0 };
+		SOCKET newClient;
+		if (AcceptClient(ClientAddr, newClient))
+		{
+			//Thread/Client
+			
+			LauncheThreadClient(newClient, ClientAddr, this);
+		}
+		else
+		{
+			std::cout << "Socket accept Error : " << Sockets::GetError() << std::endl;
+			break;
+		}
+
+	} while (true);
+}
+
+void Server::AddClient(Client newClient)
+{
+	for (unsigned int i = 0; i < m_Clients.size(); i++)
+	{
+		if (m_Clients[i] == newClient)
+		{
+			return;
+		}
+	}
+	m_Clients.push_back(newClient);
+}
+
+void Server::RemoveClient(Client newClient)
+{
+	unsigned int Index = 0;
+	for (unsigned int i = 0; i < m_Clients.size(); i++)
+	{
+		if (m_Clients[i] == newClient)
+		{
+			m_Clients.erase(m_Clients.begin() + Index);
+			return;
+		}
+		else
+			Index++;
+	}
+}
+
 bool Server::AcceptClient(sockaddr_in& ClientAddr, SOCKET& ClientSocket)
 {
 	ClientAddr = { 0 };
@@ -119,30 +175,34 @@ bool Server::AcceptClient(sockaddr_in& ClientAddr, SOCKET& ClientSocket)
 	return true;
 }
 
-void Server::LauncheThreadClient(SOCKET newClient, sockaddr_in ClientAddr)
+void Server::LauncheThreadClient(SOCKET newClient, sockaddr_in ClientAddr, Server* ThisServer)
 {
-	std::thread([newClient, ClientAddr]()
+	std::thread([newClient, ClientAddr, ThisServer]()
 	{
 		std::string ClientAddress = Sockets::GetAdress(ClientAddr);
 		unsigned short ClientPort = ntohs(ClientAddr.sin_port);
 
 		std::cout << "Connection [" << ClientAddress << ":" << ClientPort << "]" << std::endl;
 		bool connected = true;
+		
+		ThisServer->AddClient(Client(newClient, ClientAddr));
 
 		//While we have the connection with the client
 		do
 		{
 			//Do the interaction with the client (ex : recv and send)
 
-			ClientInteraction(newClient, ClientAddr, ClientAddress, ClientPort);
+			ThisServer->ClientInteraction(newClient, ClientAddr, ClientAddress, ClientPort);
 
 		} while (true);
 
 		std::cout << "Deconnection [" << ClientAddress << ":" << ClientPort << "]" << std::endl;
+
+		ThisServer->RemoveClient(Client(newClient, ClientAddr));
+
 	}).detach();
 }
 
-//static for the lambda uses
 bool Server::ClientInteraction(SOCKET newClient, sockaddr_in ClientAddr, std::string ClientAddress, unsigned short ClientPort)
 {
 	char Buffer[200] = { 0 };
@@ -155,5 +215,7 @@ bool Server::ClientInteraction(SOCKET newClient, sockaddr_in ClientAddr, std::st
 
 	int BytesSend = send(newClient, Buffer, BytesReceived, 0);
 	if (BytesSend == 0 || BytesSend == SOCKET_ERROR)
-		false;
+		return false;
+
+	return true;
 }
