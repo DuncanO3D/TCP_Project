@@ -39,6 +39,11 @@ void Client::SendToServer(const char * data, unsigned short len)
 		Send(reinterpret_cast<const unsigned char *>(data), len);
 }
 
+void Client::SetToListen()
+{
+	LaunchListenThread(this);
+}
+
 
 bool Client::InitClient()
 {	

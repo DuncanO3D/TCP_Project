@@ -19,6 +19,7 @@ public:
 	void CloseClient();
 
 	void SendToServer(const char* data, unsigned short len);
+	void SetToListen();
 
 private:
 	SOCKET m_Socket;	
