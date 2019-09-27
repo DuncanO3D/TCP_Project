@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Sockets.h"
+#include <iostream>
 #include <string>
+#include <vector>
 
 class TCPSocket
 {
@@ -11,8 +13,8 @@ public:
 
 	bool Connect(const std::string& ipaddress, unsigned short port);
 
-	int Send(const unsigned char* data, unsigned short len);
-	int Receive(char* buffer, unsigned int len);
+	bool Send(const unsigned char* data, unsigned short len);
+	bool Receive(std::vector<char*> buffer);
 
 private:
 	int m_Family;
