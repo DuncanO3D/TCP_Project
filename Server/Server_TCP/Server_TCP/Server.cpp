@@ -32,7 +32,7 @@ std::vector<std::string> Server::GetConnectedClients()
 {
 	std::vector<std::string> ClientsAdress = std::vector<std::string>();
 
-	for (int i = 0; i < m_Clients->size(); i++)
+	for (unsigned int i = 0; i < m_Clients->size(); i++)
 	{
 		ClientsAdress.push_back(Sockets::GetAdress(m_Clients->at(i).m_addr));
 	}
@@ -130,30 +130,30 @@ void Server::AcceptClients()
 			std::cout << "Socket accept Error : " << Sockets::GetError() << std::endl;
 			break;
 		}
-
+		//Add a contition for abbording the server
 	} while (true);
 }
 
 void Server::AddClient(Client newClient)
 {
-	for (unsigned int i = 0; i < m_Clients.size(); i++)
+	for (unsigned int i = 0; i < m_Clients->size(); i++)
 	{
-		if (m_Clients[i] == newClient)
+		if (m_Clients->at(i) == newClient)
 		{
 			return;
 		}
 	}
-	m_Clients.push_back(newClient);
+	m_Clients->push_back(newClient);
 }
 
 void Server::RemoveClient(Client newClient)
 {
 	unsigned int Index = 0;
-	for (unsigned int i = 0; i < m_Clients.size(); i++)
+	for (unsigned int i = 0; i < m_Clients->size(); i++)
 	{
-		if (m_Clients[i] == newClient)
+		if (m_Clients->at(i) == newClient)
 		{
-			m_Clients.erase(m_Clients.begin() + Index);
+			m_Clients->erase(m_Clients->begin() + Index);
 			return;
 		}
 		else
