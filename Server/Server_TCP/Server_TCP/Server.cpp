@@ -130,7 +130,6 @@ void Server::AcceptClients()
 			std::cout << "Socket accept Error : " << Sockets::GetError() << std::endl;
 			break;
 		}
-		//Add a contition for abbording the server
 	} while (true);
 }
 

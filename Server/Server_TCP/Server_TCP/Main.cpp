@@ -13,4 +13,3 @@ int main()
 	MyServer->StopServer();
 	delete MyServer;
 }
-
