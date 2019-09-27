@@ -1,6 +1,9 @@
 #include "Server.h"
 #include "Sockets.h"
-#include "LogSystem.h"
+
+#include <thread>
+#include <mutex>
+
 
 Server::Server()
 {
@@ -36,21 +39,25 @@ bool Server::LauncheServer(unsigned int Port)
 	return true;
 }
 
-bool Server::AcceptClient(sockaddr_in& ClientAddr)
+void Server::AcceptClients()
 {
-	ClientAddr = { 0 };
-	int Lenght = sizeof(ClientAddr);
-
-	SOCKET newClient = accept(m_Socket, (sockaddr*)&ClientAddr, &Lenght);
-	if (newClient == INVALID_SOCKET)
+	//While whe have no error
+	do
 	{
-		std::cout << "Socket accept Error : " << Sockets::GetError() << std::endl;
-		return false;
-	}
+		sockaddr_in ClientAddr = { 0 };
+		SOCKET newClient;
+		if (AcceptClient(ClientAddr, newClient))
+		{
+			//Thread/Client
+			LauncheThreadClient(newClient, ClientAddr);
+		}
+		else
+		{
+			std::cout << "Socket accept Error : " << Sockets::GetError() << std::endl;
+			break;
+		}
 
-	std::cout << "Connection : " << Sockets::GetAdress(ClientAddr) << " on port " << ClientAddr.sin_port << std::endl;
-
-	return true;
+	} while (true);
 }
 
 void Server::CloseServer()
@@ -96,4 +103,57 @@ bool Server::SetServerToListen()
 		return false;
 	}
 	return true;
+}
+
+bool Server::AcceptClient(sockaddr_in& ClientAddr, SOCKET& ClientSocket)
+{
+	ClientAddr = { 0 };
+	int Lenght = sizeof(ClientAddr);
+
+	ClientSocket = accept(m_Socket, (sockaddr*)&ClientAddr, &Lenght);
+	if (ClientSocket == INVALID_SOCKET)
+	{
+		std::cout << "Socket accept Error : " << Sockets::GetError() << std::endl;
+		return false;
+	}
+	return true;
+}
+
+void Server::LauncheThreadClient(SOCKET newClient, sockaddr_in ClientAddr)
+{
+	std::thread([newClient, ClientAddr]()
+	{
+		std::string ClientAddress = Sockets::GetAdress(ClientAddr);
+		unsigned short ClientPort = ntohs(ClientAddr.sin_port);
+
+		std::cout << "Connection [" << ClientAddress << ":" << ClientPort << "]" << std::endl;
+		bool connected = true;
+
+		//While we have the connection with the client
+		do
+		{
+			//Do the interaction with the client (ex : recv and send)
+
+			ClientInteraction(newClient, ClientAddr, ClientAddress, ClientPort);
+
+		} while (true);
+
+		std::cout << "Deconnection [" << ClientAddress << ":" << ClientPort << "]" << std::endl;
+	}).detach();
+}
+
+//static for the lambda uses
+bool Server::ClientInteraction(SOCKET newClient, sockaddr_in ClientAddr, std::string ClientAddress, unsigned short ClientPort)
+{
+	char Buffer[200] = { 0 };
+
+	int BytesReceived = recv(newClient, Buffer, 199, 0);
+	if (BytesReceived == 0 || BytesReceived == SOCKET_ERROR)
+		return false;
+
+	std::cout << "[" << ClientAddress << ":" << ClientPort << "]" << Buffer << std::endl;
+
+	int BytesSend = send(newClient, Buffer, BytesReceived, 0);
+	if (BytesSend == 0 || BytesSend == SOCKET_ERROR)
+		false;
 }

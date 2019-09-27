@@ -115,13 +115,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="LogSystem.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Sockets.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="LogSystem.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="Sockets.h" />
   </ItemGroup>
