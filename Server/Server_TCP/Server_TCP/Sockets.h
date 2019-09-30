@@ -11,5 +11,6 @@ namespace Sockets
 	int GetError();
 	void CloseSocket(SOCKET socket);
 	std::string GetAdress(const sockaddr_in& addr);
+	char * NetworkDataMaker(const char * Buffer);
 };
 

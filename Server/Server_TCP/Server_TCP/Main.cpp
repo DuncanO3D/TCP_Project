@@ -2,10 +2,7 @@
 
 int main()
 {
-	unsigned int ServerPort = 0;
-	std::cout << "Choose port : ";
-	std::cin >> ServerPort;
-	std::cout << std::endl;
+	unsigned int ServerPort = 6666;
 
 	Server * MyServer = new Server();
 	MyServer->LaunchServer(ServerPort);

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <thread>
 //Base Lib for network in c++
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -18,12 +19,17 @@ public:
 	bool ConnectClient(const char* IP, unsigned short Port);
 	void CloseClient();
 
-	void SendToServer(const char* data, unsigned short len);
+	void SendToServer(const char* data);
 	void SetToListen();
 
 private:
 	SOCKET m_Socket;	
 	bool m_Connected;
+
+	std::string m_ConnectedServer_Address;
+	int m_ConnectedServer_Port;
+
+	std::vector<std::thread*> m_LaunchedThreads;
 
 	bool InitClient();
 	bool InitSocket();
@@ -31,16 +37,14 @@ private:
 
 	void StopClient();
 
-	void Send(const unsigned char* data, unsigned short len);
+	void Send(const char* data);
 	void Receive(std::vector<char*> buffer);
-
-
-	void LaunchSendingThread(const unsigned char* data, unsigned short networklen, unsigned short len, Client* ThisClient);
-	void SendingDone(const unsigned char* DataSend);
-	void SendingError(const unsigned char* DataSend);
-
-
+	
+	void LaunchSendingThread(const char* data, Client* ThisClient);
+	
 	void LaunchListenThread(Client* ThisClient);
-	void ListenDone(std::vector<char*> DataBuffer);
-	void ListenError(const char* Error);
+
+	void Disconnected();
+
+	void FreeLaunchedTreads();
 };

@@ -1,9 +1,6 @@
 #include "Client.h"
 #include "Sockets.h"
 
-#include <thread>
-#include <mutex>
-
 Client::Client()
 {
 	m_Connected = false;
@@ -29,19 +26,21 @@ bool Client::ConnectClient(const char * IP, unsigned short Port)
 
 void Client::CloseClient()
 {
+	FreeLaunchedTreads();
 	StopClient();
 	m_Connected = false;
 }
 
-void Client::SendToServer(const char * data, unsigned short len)
+void Client::SendToServer(const char * data)
 {
 	if(m_Connected)
-		Send(reinterpret_cast<const unsigned char *>(data), len);
+		Send(data);
 }
 
 void Client::SetToListen()
 {
-	LaunchListenThread(this);
+	if (m_Connected)
+		Receive(std::vector<char*>());
 }
 
 
@@ -85,6 +84,8 @@ bool Client::ConnectToServer(const std::string& IP, unsigned short Port)
 		return false;
 	}
 	std::cout << "Connected : [" << IP << ":" << Port << "]" << std::endl;
+	m_ConnectedServer_Address = IP;
+	m_ConnectedServer_Port = Port;
 
 	return true;
 }
@@ -96,11 +97,9 @@ void Client::StopClient()
 }
 
 
-void Client::Send(const unsigned char * data, unsigned short len)
+void Client::Send(const char * data)
 {
-	unsigned short networkLen = htons(len);
-
-	LaunchSendingThread(data, networkLen, len, this);
+	LaunchSendingThread(data, this);
 }
 
 void Client::Receive(std::vector<char*> buffer)
@@ -110,76 +109,72 @@ void Client::Receive(std::vector<char*> buffer)
 
 
 
-void Client::LaunchSendingThread(const unsigned char * data, unsigned short networklen, unsigned short len, Client* ThisClient)
+void Client::LaunchSendingThread(const char * data, Client* ThisClient)
 {
-	std::thread([data, networklen, len, ThisClient]()
+	std::thread * SendingThread = new std::thread([data, ThisClient]()
 	{
-		//Send the size
-		bool DataLenght_Send = send(ThisClient->m_Socket, reinterpret_cast<const char*>(&networklen), sizeof(networklen), 0) == sizeof(networklen);
-		//Send the data
-		bool Data_Send = send(ThisClient->m_Socket, reinterpret_cast<const char*>(data), len, 0) == len;
+		char* NetworkData = Sockets::NetworkDataMaker(data);
+		int DataSize = strlen(NetworkData);
 
-		if (DataLenght_Send && Data_Send)
-			ThisClient->SendingDone(data);
+		if (send(ThisClient->m_Socket, NetworkData, DataSize, 0) == DataSize)
+		{
+			std::cout << "to [" << ThisClient->m_ConnectedServer_Address << ":" << ThisClient->m_ConnectedServer_Port << "]" << NetworkData + 1 << std::endl;
+		}
 		else
-			ThisClient->SendingError(data);
-	}).detach();
-}
+		{
+			std::cout << "to [" << ThisClient->m_ConnectedServer_Address << ":" << ThisClient->m_ConnectedServer_Port << "]Error" << std::endl;
+		}
+	});
 
-void Client::SendingDone(const unsigned char * DataSend)
-{
-	std::cout << DataSend << " : Send" << std::endl;
-}
-void Client::SendingError(const unsigned char * DataSend)
-{
-	std::cout << DataSend << " : Send Error" << std::endl;
+	m_LaunchedThreads.push_back(SendingThread);
+	SendingThread->detach();
 }
 
 
 void Client::LaunchListenThread(Client* ThisClient)
 {
-	std::thread([ThisClient]()
-	{
-		std::vector<char*> buffer;
-		unsigned short expectedSize;
-
-		int BytesReceived_Size = recv(ThisClient->m_Socket, reinterpret_cast<char*>(&expectedSize), sizeof(expectedSize), 0);
-		if (!(BytesReceived_Size <= 0 || BytesReceived_Size != sizeof(unsigned short)))
-		{
-			ThisClient->ListenError("Error in size received");
-			return;
-		}
-
-		expectedSize = ntohs(expectedSize);
-		buffer.resize(expectedSize);
-		int receivedSize = 0;
-
+	std::thread * ListenThread = new std::thread([ThisClient]()
+	{		
 		do
 		{
-			int BytesReceived_Data = recv(ThisClient->m_Socket, reinterpret_cast<char*>(&buffer[receivedSize]), (expectedSize - receivedSize) + sizeof(unsigned char), 0);
-			if (BytesReceived_Data <= 0)
+			char Buffer[255] = "";
+			int BytesReceived = recv(ThisClient->m_Socket, Buffer, 255, 0);
+			if (BytesReceived <= 0)
 			{
-				ThisClient->ListenError("Error in size received");
+				ThisClient->Disconnected();
 				return;
+			}
+			else if (Buffer[0] != strlen(Buffer + 1))
+			{
+				std::cout << "[" << ThisClient->m_ConnectedServer_Address << ":" << ThisClient->m_ConnectedServer_Port << "]Error" << std::endl;
 			}
 			else
 			{
-				receivedSize += BytesReceived_Data;
+				std::cout << "[" << ThisClient->m_ConnectedServer_Address << ":" << ThisClient->m_ConnectedServer_Port << "]" << Buffer + 1 << std::endl;
 			}
-		} while (receivedSize < expectedSize);
+		} while (true);
 
-		ThisClient->ListenDone(buffer);
-	}).detach();
+	});
+
+	m_LaunchedThreads.push_back(ListenThread);
+	ListenThread->detach();
 }
 
-void Client::ListenDone(std::vector<char*> DataBuffer)
+void Client::Disconnected()
 {
-	for (unsigned i = 0; i < DataBuffer.size(); i++)
+	std::cout << "Disconnected : [" << m_ConnectedServer_Address << ":" << m_ConnectedServer_Port << "]" << std::endl;
+	m_ConnectedServer_Address = "";
+	m_ConnectedServer_Port = 0;
+	m_Connected = false;
+}
+
+
+void Client::FreeLaunchedTreads()
+{
+	for (unsigned int i = 0; i < m_LaunchedThreads.size(); i++)
 	{
-		std::cout << DataBuffer.at(i) << " : Received" << std::endl;
+		if(m_LaunchedThreads.at(i) != nullptr)
+			delete m_LaunchedThreads.at(i);
 	}
-}
-void Client::ListenError(const char* Error)
-{
-	std::cout << "Error : " << Error << std::endl;
+	m_LaunchedThreads.clear();
 }

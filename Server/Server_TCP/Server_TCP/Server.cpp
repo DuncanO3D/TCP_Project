@@ -1,26 +1,22 @@
 #include "Server.h"
 #include "Sockets.h"
 
-#include <thread>
-#include <mutex>
-
-
 Server::Server()
 {
-	m_Clients = new std::vector<Client>();
+	m_ClientsMap = new std::map<SOCKET, sockaddr_in>();
 }
 
 Server::~Server()
 {
 	StopServer();
-	delete m_Clients;
+	delete m_ClientsMap;
 }
 
 void Server::LaunchServer(unsigned int Port)
 {
 	InitServer(Port);
 
-	AcceptClients();
+	ListenClients();
 }
 
 void Server::StopServer()
@@ -32,14 +28,19 @@ std::vector<std::string> Server::GetConnectedClients()
 {
 	std::vector<std::string> ClientsAdress = std::vector<std::string>();
 
-	for (unsigned int i = 0; i < m_Clients->size(); i++)
+	auto it = m_ClientsMap->begin();
+	std::string ClientAddress;
+	unsigned short ClientPort;
+	while (it != m_ClientsMap->end())
 	{
-		ClientsAdress.push_back(Sockets::GetAdress(m_Clients->at(i).m_addr));
+		ClientAddress = Sockets::GetAdress(it->second);
+		ClientPort = ntohs(it->second.sin_port);
+		ClientsAdress.push_back(ClientAddress + ":" + std::to_string(ClientPort));
+		it++;
 	}
 
 	return ClientsAdress;
 }
-
 
 
 bool Server::InitServer(unsigned int Port)
@@ -112,111 +113,102 @@ bool Server::SetServerToListen()
 	return true;
 }
 
-void Server::AcceptClients()
+
+
+void Server::ListenClients()
 {
-	//While whe have no error
 	do
 	{
 		sockaddr_in ClientAddr = { 0 };
 		SOCKET newClient;
-		if (AcceptClient(ClientAddr, newClient))
+		int Lenght = sizeof(ClientAddr);
+
+		newClient = accept(m_Socket, (sockaddr*)&ClientAddr, &Lenght);
+
+		if (newClient != SOCKET_ERROR)
 		{
-			//Thread/Client
-			
-			LauncheThreadClient(newClient, ClientAddr, this);
+			AcceptClient(newClient, ClientAddr);
 		}
 		else
 		{
 			std::cout << "Socket accept Error : " << Sockets::GetError() << std::endl;
-			break;
+			return;
 		}
 	} while (true);
 }
 
-void Server::AddClient(Client newClient)
+void Server::AcceptClient(SOCKET ClientSocket, sockaddr_in ClientAddr)
 {
-	for (unsigned int i = 0; i < m_Clients->size(); i++)
+	if (m_ClientsMap->find(ClientSocket) != m_ClientsMap->end())
+		return;
+
+	std::string ClientAddress = Sockets::GetAdress(ClientAddr);
+	unsigned short ClientPort = ntohs(ClientAddr.sin_port);
+	std::cout << "[" << ClientAddress << ":" << ClientPort << "]Connected" << std::endl;
+
+	m_ClientsMap->emplace(ClientSocket, ClientAddr);
+
+
+	std::cout << "Connected Clients" << std::endl;
+	std::vector<std::string> ClientsStr = GetConnectedClients();
+	for (unsigned int i = 0; i < ClientsStr.size(); i++)
 	{
-		if (m_Clients->at(i) == newClient)
-		{
-			return;
-		}
+		std::cout << ClientsStr.at(i) << std::endl;
 	}
-	m_Clients->push_back(newClient);
+
+	ManageClient(ClientSocket, ClientAddr, this);
 }
 
-void Server::RemoveClient(Client newClient)
+void Server::ManageClient(SOCKET ClientSocket, sockaddr_in ClientAddr, Server * ThisServer)
 {
-	unsigned int Index = 0;
-	for (unsigned int i = 0; i < m_Clients->size(); i++)
-	{
-		if (m_Clients->at(i) == newClient)
-		{
-			m_Clients->erase(m_Clients->begin() + Index);
-			return;
-		}
-		else
-			Index++;
-	}
-}
-
-bool Server::AcceptClient(sockaddr_in& ClientAddr, SOCKET& ClientSocket)
-{
-	ClientAddr = { 0 };
-	int Lenght = sizeof(ClientAddr);
-
-	ClientSocket = accept(m_Socket, (sockaddr*)&ClientAddr, &Lenght);
-	if (ClientSocket == INVALID_SOCKET)
-	{
-		std::cout << "Socket accept Error : " << Sockets::GetError() << std::endl;
-		return false;
-	}
-	return true;
-}
-
-
-void Server::LauncheThreadClient(SOCKET newClient, sockaddr_in ClientAddr, Server* ThisServer)
-{
-	//Add Mutex if we need a control of thread order
-	std::thread([newClient, ClientAddr, ThisServer]()
+	std::thread([ClientSocket, ClientAddr, ThisServer]()
 	{
 		std::string ClientAddress = Sockets::GetAdress(ClientAddr);
 		unsigned short ClientPort = ntohs(ClientAddr.sin_port);
 
-		std::cout << "Connection [" << ClientAddress << ":" << ClientPort << "]" << std::endl;
-		bool connected = true;
-		
-		ThisServer->AddClient(Client(newClient, ClientAddr));
-
-		//While we have the connection with the client
 		do
 		{
-			//Do the interaction with the client (ex : recv and send)
+			char Buffer[255] = "";
+			int BytesReceived = recv(ClientSocket, Buffer, 255, 0);
+			if (BytesReceived <= 0)
+			{
+				std::cout << "[" << ClientAddress << ":" << ClientPort << "]Disconnected" << std::endl;
+				ThisServer->CloseClient(ClientSocket);
+				return;
+			}
+			else if (Buffer[0] != strlen(Buffer + 1))
+			{
+				std::cout << "[" << ClientAddress << ":" << ClientPort << "]Error" << std::endl;
+			}
+			else
+			{
+				std::cout << "[" << ClientAddress << ":" << ClientPort << "]" << Buffer + 1 << std::endl;
 
-			ThisServer->ClientInteraction(newClient, ClientAddr, ClientAddress, ClientPort);
-
+				ThisServer->SendToClient(ClientSocket, ClientAddr, "T'es mauvais jack", ThisServer);
+			}
 		} while (true);
-
-		std::cout << "Deconnection [" << ClientAddress << ":" << ClientPort << "]" << std::endl;
-
-		ThisServer->RemoveClient(Client(newClient, ClientAddr));
 
 	}).detach();
 }
 
-bool Server::ClientInteraction(SOCKET newClient, sockaddr_in ClientAddr, std::string ClientAddress, unsigned short ClientPort)
+void Server::CloseClient(SOCKET ClientSocket)
 {
-	char Buffer[200] = { 0 };
+	m_ClientsMap->erase(ClientSocket);
+}
 
-	int BytesReceived = recv(newClient, Buffer, 199, 0);
-	if (BytesReceived == 0 || BytesReceived == SOCKET_ERROR)
-		return false;
+void Server::SendToClient(SOCKET ClientSocket, sockaddr_in ClientAddr, const char* Data, Server * ThisServer)
+{
+	std::thread([ClientSocket, ClientAddr, Data, ThisServer]()
+	{
+		std::string ClientAddress = Sockets::GetAdress(ClientAddr);
+		unsigned short ClientPort = ntohs(ClientAddr.sin_port);
 
-	std::cout << "[" << ClientAddress << ":" << ClientPort << "]" << Buffer << std::endl;
+		char* NetworkData = Sockets::NetworkDataMaker(Data);
+		int DataSize = strlen(NetworkData);
 
-	int BytesSend = send(newClient, Buffer, BytesReceived, 0);
-	if (BytesSend == 0 || BytesSend == SOCKET_ERROR)
-		return false;
-
-	return true;
+		if (send(ClientSocket, NetworkData, DataSize, 0) == DataSize)
+			std::cout << "to [" << ClientAddress << ":" << ClientPort << "]" << Data << std::endl;
+		else
+			std::cout << "to [" << ClientAddress << ":" << ClientPort << "]Error" << std::endl;
+	}).detach();
 }

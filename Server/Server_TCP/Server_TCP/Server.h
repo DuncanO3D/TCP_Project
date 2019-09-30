@@ -1,22 +1,16 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 #include <vector>
 #include <map>
+#include <thread>
+#include <mutex>
 //Base Lib for network in c++
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 //Lib Linkage
 #pragma comment(lib, "Ws2_32.lib")
-
-struct Client
-{
-	Client(SOCKET sock, sockaddr_in addr) { m_socket = sock; m_addr = addr; }
-	SOCKET m_socket;
-	sockaddr_in m_addr;
-
-	bool operator==(Client b) { return m_socket == b.m_socket && m_addr.sin_addr.s_addr == b.m_addr.sin_addr.s_addr; }
-};
 
 class Server
 {
@@ -32,7 +26,9 @@ private:
 	SOCKET m_Socket;
 	sockaddr_in m_Addr;
 	
-	std::vector<Client>* m_Clients;
+	//std::vector<SOCKET>* m_Clients;
+	std::map<SOCKET, sockaddr_in>* m_ClientsMap;
+
 
 	bool InitServer(unsigned int Port);
 	void CloseServer();
@@ -41,15 +37,15 @@ private:
 	bool BindAddr(unsigned int Port);
 	bool SetServerToListen();
 
-	void AcceptClients();
+	void ListenClients();
 
-	void AddClient(Client newClient);
-	void RemoveClient(Client newClient);
 
-	bool AcceptClient(sockaddr_in& ClientAddr, SOCKET& ClientSocket);
+	void AcceptClient(SOCKET ClientSocket, sockaddr_in ClientAddr);
 
-	void LauncheThreadClient(SOCKET newClient, sockaddr_in ClientAddr, Server* ThisServer);
+	void ManageClient(SOCKET ClientSocket, sockaddr_in ClientAddr, Server* ThisServer);
 
-	bool ClientInteraction(SOCKET newClient, sockaddr_in ClientAddr, std::string ClientAddress, unsigned short ClientPort);
+	void CloseClient(SOCKET ClientSocket);
+
+	void SendToClient(SOCKET ClientSocket, sockaddr_in ClientAddr, const char* Data, Server* ThisServer);
 };
 
