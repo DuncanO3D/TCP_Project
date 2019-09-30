@@ -47,5 +47,8 @@ private:
 	void CloseClient(SOCKET ClientSocket);
 
 	void SendToClient(SOCKET ClientSocket, sockaddr_in ClientAddr, const char* Data, Server* ThisServer);
+
+	//To do
+	void BradCast();
 };
 
