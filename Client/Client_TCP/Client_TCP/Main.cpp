@@ -25,7 +25,8 @@ int main()
 		char Buffer[255] = "";
 		do
 		{
-			std::cin >> Buffer;
+			std::cin.getline(Buffer, sizeof(Buffer));
+
 			if (strcmp(Buffer, "End") == 0)
 				break;
 			MyClient->SendToServer(Buffer);
