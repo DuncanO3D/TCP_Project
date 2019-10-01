@@ -3,13 +3,13 @@
 
 Server::Server()
 {
-	m_ClientsMap = new std::map<SOCKET, sockaddr_in>();
+	m_ClientsSet = new std::set<Client*>();
 }
 
 Server::~Server()
 {
 	StopServer();
-	delete m_ClientsMap;
+	delete m_ClientsSet;
 }
 
 void Server::LaunchServer(unsigned int Port)
@@ -28,14 +28,10 @@ std::vector<std::string> Server::GetConnectedClients()
 {
 	std::vector<std::string> ClientsAdress = std::vector<std::string>();
 
-	auto it = m_ClientsMap->begin();
-	std::string ClientAddress;
-	unsigned short ClientPort;
-	while (it != m_ClientsMap->end())
+	auto it = m_ClientsSet->begin();
+	while (it != m_ClientsSet->end())
 	{
-		ClientAddress = Sockets::GetAdress(it->second);
-		ClientPort = ntohs(it->second.sin_port);
-		ClientsAdress.push_back(ClientAddress + ":" + std::to_string(ClientPort));
+		ClientsAdress.push_back(it._Ptr->_Myval->GetName());
 		it++;
 	}
 
@@ -71,6 +67,16 @@ bool Server::InitServer(unsigned int Port)
 
 void Server::CloseServer()
 {
+	SendShutDownMessage();
+
+	auto it = m_ClientsSet->begin();
+	while (it != m_ClientsSet->end())
+	{
+		delete it._Ptr->_Myval;
+		it++;
+	}
+	m_ClientsSet->clear();
+
 	Sockets::CloseSocket(m_Socket);
 	Sockets::Release();
 }
@@ -139,53 +145,64 @@ void Server::ListenClients()
 
 void Server::AcceptClient(SOCKET ClientSocket, sockaddr_in ClientAddr)
 {
-	if (m_ClientsMap->find(ClientSocket) != m_ClientsMap->end())
-		return;
+	Client * NewClient = new Client(ClientSocket, ClientAddr, "");
+	
+	auto it = m_ClientsSet->begin();
+	while (it != m_ClientsSet->end())
+	{
+		if (it._Ptr->_Myval->m_Socket == NewClient->m_Socket)
+		{
+			delete NewClient;
+			return;
+		}
+	}
 
 	std::string ClientAddress = Sockets::GetAdress(ClientAddr);
 	unsigned short ClientPort = ntohs(ClientAddr.sin_port);
-	std::cout << "[" << ClientAddress << ":" << ClientPort << "]Connected" << std::endl;
+	std::cout << "[" << NewClient->m_Name << "]Connected" << std::endl;
 
-	m_ClientsMap->emplace(ClientSocket, ClientAddr);
+	auto pair = m_ClientsSet->emplace(NewClient);
 
+	//std::cout << "Connected Clients" << std::endl;
+	//std::vector<std::string> ClientsStr = GetConnectedClients();
+	//for (unsigned int i = 0; i < ClientsStr.size(); i++)
+	//{
+	//	std::cout << ClientsStr.at(i) << std::endl;
+	//}
 
-	std::cout << "Connected Clients" << std::endl;
-	std::vector<std::string> ClientsStr = GetConnectedClients();
-	for (unsigned int i = 0; i < ClientsStr.size(); i++)
-	{
-		std::cout << ClientsStr.at(i) << std::endl;
-	}
+	SendJoinMessage(NewClient);
 
-	ManageClient(ClientSocket, ClientAddr, this);
+	ManageClient(pair.first._Ptr->_Myval, this);
 }
 
-void Server::ManageClient(SOCKET ClientSocket, sockaddr_in ClientAddr, Server * ThisServer)
+void Server::ManageClient(Client * ClientStruct, Server * ThisServer)
 {
-	std::thread([ClientSocket, ClientAddr, ThisServer]()
+	if(ClientStruct == nullptr)
+		return;
+
+	std::thread([ClientStruct, ThisServer]()
 	{
-		std::string ClientAddress = Sockets::GetAdress(ClientAddr);
-		unsigned short ClientPort = ntohs(ClientAddr.sin_port);
+		std::string ClientAddress = Sockets::GetAdress(ClientStruct->m_Addr);
+		unsigned short ClientPort = ntohs(ClientStruct->m_Addr.sin_port);
 
 		do
 		{
 			char Buffer[255] = "";
-			int BytesReceived = recv(ClientSocket, Buffer, 255, 0);
+			int BytesReceived = recv(ClientStruct->m_Socket, Buffer, 255, 0);
 			if (BytesReceived <= 0)
 			{
-				std::cout << "[" << ClientAddress << ":" << ClientPort << "]Disconnected" << std::endl;
-				ThisServer->CloseClient(ClientSocket);
+				std::cout << "[" << ClientStruct->GetName() << "]Disconnected" << std::endl;
+				ThisServer->CloseClient(ClientStruct);
 				return;
 			}
 			else if (Buffer[0] != strlen(Buffer + 1))
 			{
-				std::cout << "[" << ClientAddress << ":" << ClientPort << "]Error" << std::endl;
+				std::cout << "[" << ClientStruct->GetName() << "]Error" << std::endl;
 			}
 			else
 			{
-				std::cout << "[" << ClientAddress << ":" << ClientPort << "]" << Buffer + 1 << std::endl;
+				std::cout << "[" << ClientStruct->GetName() << "]" << Buffer + 1 << std::endl;
 
-				//ThisServer->SendToClient_Thread(ClientSocket, ClientAddr, "T'es mauvais jack", ThisServer);
-				//ThisServer->Broadcast(Buffer + 1);
 				ThisServer->BroadCast_Thread(Buffer + 1, ThisServer);
 			}
 		} while (true);
@@ -193,18 +210,32 @@ void Server::ManageClient(SOCKET ClientSocket, sockaddr_in ClientAddr, Server * 
 	}).detach();
 }
 
-void Server::CloseClient(SOCKET ClientSocket)
+void Server::CloseClient(Client * ClientStruct)
 {
-	m_ClientsMap->erase(ClientSocket);
+	if (ClientStruct == nullptr)
+		return;
+
+	auto it = m_ClientsSet->begin();
+	while (it != m_ClientsSet->end())
+	{
+		if (it._Ptr->_Myval->m_Socket == ClientStruct->m_Socket)
+		{
+			m_ClientsSet->erase(it);
+		}
+	}
+
+	SendLeftMessage(ClientStruct);
+
+	delete ClientStruct;
 }
 
-void Server::SendToClient_Thread(SOCKET ClientSocket, sockaddr_in ClientAddr, const char* Data, Server * ThisServer)
+void Server::SendToClient_Thread(Client * ClientStruct, const char* Data, Server * ThisServer)
 {
-	std::thread([ClientSocket, ClientAddr, Data, ThisServer]()
+	std::thread([ClientStruct, Data, ThisServer]()
 	{
 		char cpyDate[255] = "";
 		strcpy_s(cpyDate, Data);
-		ThisServer->SendToClient(ClientSocket, ClientAddr, Data);
+		ThisServer->SendToClient(ClientStruct, Data);
 	}).detach();
 }
 
@@ -218,25 +249,62 @@ void Server::BroadCast_Thread(const char * Data, Server* ThisServer)
 	}).detach();
 }
 
-void Server::SendToClient(SOCKET ClientSocket, sockaddr_in ClientAddr, const char * Data)
+void Server::SendToClient(Client * ClientStruct, const char * Data)
 {
-	std::string ClientAddress = Sockets::GetAdress(ClientAddr);
-	unsigned short ClientPort = ntohs(ClientAddr.sin_port);
+	std::string ClientAddress = Sockets::GetAdress(ClientStruct->m_Addr);
+	unsigned short ClientPort = ntohs(ClientStruct->m_Addr.sin_port);
 
 	char* NetworkData = Sockets::NetworkDataMaker(Data);
 	int DataSize = strlen(NetworkData);
 
-	if (send(ClientSocket, NetworkData, DataSize, 0) == DataSize)
-		std::cout << "to [" << ClientAddress << ":" << ClientPort << "]" << NetworkData + 1 << std::endl;
+	if (send(ClientStruct->m_Socket, NetworkData, DataSize, 0) == DataSize)
+		std::cout << "to [" << ClientStruct->GetName() << "]" << NetworkData + 1 << std::endl;
 	else
-		std::cout << "to [" << ClientAddress << ":" << ClientPort << "]Error" << std::endl;
+		std::cout << "to [" << ClientStruct->GetName() << "]Error" << std::endl;
 }
 
 void Server::Broadcast(const char * Data)
 {
-	auto It = m_ClientsMap->begin();
-	for (It = m_ClientsMap->begin(); It != m_ClientsMap->end(); It++)
+	auto It = m_ClientsSet->begin();
+	for (It = m_ClientsSet->begin(); It != m_ClientsSet->end(); It++)
 	{
-		SendToClient(It->first, It->second, Data);
+		SendToClient(It._Ptr->_Myval, Data);
 	}
+}
+
+
+
+void Server::SendJoinMessage(Client * JoiningClient)
+{
+	char DisconnectMessage[255] = "";
+	if (JoiningClient->m_Name != "")
+	{
+		strcat_s(DisconnectMessage, JoiningClient->m_Name);
+	}
+	else
+	{
+		strcat_s(DisconnectMessage, Sockets::GetAdress(JoiningClient->m_Addr).c_str());
+	}
+	strcat_s(DisconnectMessage, " has join");
+	BroadCast_Thread(DisconnectMessage, this);
+}
+
+void Server::SendLeftMessage(Client * LeavingClient)
+{
+	char DisconnectMessage[255] = "";
+	if (LeavingClient->m_Name != "")
+	{
+		strcat_s(DisconnectMessage, LeavingClient->m_Name);
+	}
+	else
+	{
+		strcat_s(DisconnectMessage, Sockets::GetAdress(LeavingClient->m_Addr).c_str());
+	}
+	strcat_s(DisconnectMessage, " has left");
+	BroadCast_Thread(DisconnectMessage, this);
+}
+
+void Server::SendShutDownMessage()
+{
+	BroadCast_Thread("Server shut down", this);
 }

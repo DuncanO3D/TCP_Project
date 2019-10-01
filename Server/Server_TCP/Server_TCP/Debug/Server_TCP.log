@@ -1,2 +1,6 @@
-﻿  Server.cpp
+﻿  Client.cpp
+  Main.cpp
+  Server.cpp
+  Generating Code...
+d:\github_o3d\tcp_project\server\server_tcp\server_tcp\client.cpp(21): warning C4715: 'Client::GetName': not all control paths return a value
   Server_TCP.vcxproj -> D:\GitHub_O3D\TCP_Project\Server\Server_TCP\Debug\Server_TCP.exe

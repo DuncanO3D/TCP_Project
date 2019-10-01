@@ -8,11 +8,15 @@ int main()
 	{
 		char IP[50] = "127.0.0.1";
 		int Port = 6666;
+		char Name[255] = "Default";
 
 		std::cout << "IP : ";
 		std::cin >> IP;
 		std::cout << "Port : ";
 		std::cin >> Port;
+		std::cout << "Name : ";
+		std::cin >> Name;
+		MyClient->SetName(Name);
 
 		do {} while (MyClient->ConnectClient(IP, Port) == false);
 		MyClient->SetToListen();

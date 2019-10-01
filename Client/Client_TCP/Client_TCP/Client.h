@@ -16,6 +16,8 @@ public:
 	Client();
 	~Client();
 
+	void SetName(char* Name);
+
 	bool ConnectClient(const char* IP, unsigned short Port);
 	void CloseClient();
 
@@ -23,6 +25,7 @@ public:
 	void SetToListen();
 
 private:
+	char m_Name[255];
 	SOCKET m_Socket;	
 	bool m_Connected;
 

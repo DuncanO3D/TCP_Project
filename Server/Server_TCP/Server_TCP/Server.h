@@ -2,15 +2,15 @@
 
 #include <iostream>
 #include <string>
+
 #include <vector>
 #include <map>
+#include <set>
+
 #include <thread>
 #include <mutex>
-//Base Lib for network in c++
-#include <WinSock2.h>
-#include <WS2tcpip.h>
-//Lib Linkage
-#pragma comment(lib, "Ws2_32.lib")
+
+#include "Client.h"
 
 class Server
 {
@@ -25,9 +25,8 @@ public:
 private:
 	SOCKET m_Socket;
 	sockaddr_in m_Addr;
-	
-	//std::vector<SOCKET>* m_Clients;
-	std::map<SOCKET, sockaddr_in>* m_ClientsMap;
+
+	std::set<Client*> * m_ClientsSet;
 
 
 	bool InitServer(unsigned int Port);
@@ -42,16 +41,22 @@ private:
 
 	void AcceptClient(SOCKET ClientSocket, sockaddr_in ClientAddr);
 
-	void ManageClient(SOCKET ClientSocket, sockaddr_in ClientAddr, Server* ThisServer);
+	void ManageClient(Client * ClientStruct, Server* ThisServer);
 
-	void CloseClient(SOCKET ClientSocket);
+	void CloseClient(Client * ClientStruct);
 
-	void SendToClient_Thread(SOCKET ClientSocket, sockaddr_in ClientAddr, const char* Data, Server* ThisServer);
+	void SendToClient_Thread(Client * ClientStruct, const char* Data, Server* ThisServer);
 
 	void BroadCast_Thread(const char * Data, Server* ThisServer);
 
-	void SendToClient(SOCKET ClientSocket, sockaddr_in ClientAddr, const char* Data);
+	void SendToClient(Client * ClientStruct, const char* Data);
 
 	void Broadcast(const char * Data);
+
+
+
+	void SendJoinMessage(Client * JoiningClient);
+	void SendLeftMessage(Client * LeavingClient);
+	void SendShutDownMessage();
 };
 

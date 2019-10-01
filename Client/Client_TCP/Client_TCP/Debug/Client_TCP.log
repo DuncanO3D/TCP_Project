@@ -1,3 +1,5 @@
 ﻿  Client.cpp
-d:\github_o3d\tcp_project\client\client_tcp\client_tcp\client.cpp(25): warning C4715: 'Client::ConnectClient': not all control paths return a value
+  Main.cpp
+  Generating Code...
+d:\github_o3d\tcp_project\client\client_tcp\client_tcp\client.cpp(30): warning C4715: 'Client::ConnectClient': not all control paths return a value
   Client_TCP.vcxproj -> D:\GitHub_O3D\TCP_Project\Client\Client_TCP\Debug\Client_TCP.exe

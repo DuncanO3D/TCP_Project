@@ -11,6 +11,11 @@ Client::~Client()
 	CloseClient();
 }
 
+void Client::SetName(char * Name)
+{
+	strcpy_s(m_Name, Name);
+}
+
 
 bool Client::ConnectClient(const char * IP, unsigned short Port)
 {
@@ -113,7 +118,7 @@ void Client::LaunchSendingThread(const char * data, Client* ThisClient)
 {
 	std::thread * SendingThread = new std::thread([data, ThisClient]()
 	{
-		char* NetworkData = Sockets::NetworkDataMaker(data);
+		char* NetworkData = Sockets::GetNetworkData(ThisClient->m_Name, data);
 		int DataSize = strlen(NetworkData);
 
 		if (send(ThisClient->m_Socket, NetworkData, DataSize, 0) != DataSize)
