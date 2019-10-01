@@ -2,10 +2,16 @@
 
 #include <iostream>
 #include <string>
+
 #include <vector>
 #include <map>
+#include <set>
+
 #include <thread>
 #include <mutex>
+
+#include "Client.h"
+
 //Base Lib for network in c++
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -28,7 +34,7 @@ private:
 	
 	//std::vector<SOCKET>* m_Clients;
 	std::map<SOCKET, sockaddr_in>* m_ClientsMap;
-
+	std::set<Client*> * m_ClientsSet;
 
 	bool InitServer(unsigned int Port);
 	void CloseServer();
@@ -53,5 +59,10 @@ private:
 	void SendToClient(SOCKET ClientSocket, sockaddr_in ClientAddr, const char* Data);
 
 	void Broadcast(const char * Data);
+
+
+	void SendJoinMessage(Client * JoiningClient);
+	void SendLeftMessage(Client * LeavingClient);
+	void SendShutDownMessage();
 };
 

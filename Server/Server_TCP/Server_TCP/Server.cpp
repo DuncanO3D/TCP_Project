@@ -243,3 +243,25 @@ void Server::Broadcast(const char * Data)
 		SendToClient(It->first, It->second, Data);
 	}
 }
+
+
+void Server::SendJoinMessage(Client * JoiningClient)
+{
+	char DisconnectMessage[255] = "";
+	strcpy_s(DisconnectMessage, JoiningClient->GetName());
+	strcat_s(DisconnectMessage, " has join");
+	BroadCast_Thread(DisconnectMessage, this);
+}
+
+void Server::SendLeftMessage(Client * LeavingClient)
+{
+	char DisconnectMessage[255] = "";
+	strcpy_s(DisconnectMessage, LeavingClient->GetName());
+	strcat_s(DisconnectMessage, " has left");
+	BroadCast_Thread(DisconnectMessage, this);
+}
+
+void Server::SendShutDownMessage()
+{
+	BroadCast_Thread("Server shut down", this);
+}
