@@ -21,6 +21,13 @@ int main()
 
 		MyClient->SetToListen();
 
+
+		//do
+		//{
+		//	MyClient->SendToServer("Test");
+		//	Sleep(250);
+		//} while (true);
+
 		std::cout << "Dialog : (End for end the program)" << std::endl;
 		char Buffer[255] = "";
 		do

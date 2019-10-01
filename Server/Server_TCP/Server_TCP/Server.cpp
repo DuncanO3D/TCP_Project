@@ -234,6 +234,9 @@ void Server::SendToClient(SOCKET ClientSocket, sockaddr_in ClientAddr, const cha
 
 void Server::Broadcast(const char * Data)
 {
+	if (Data == "" || m_ClientsMap->size() == 0)
+		return;
+
 	auto It = m_ClientsMap->begin();
 	for (It = m_ClientsMap->begin(); It != m_ClientsMap->end(); It++)
 	{
