@@ -3,18 +3,22 @@
 int main()
 {
 	Client * MyClient = new Client();
-	
+
 	do
 	{
-		char IP[50] = "127.0.0.1";
-		int Port = 6666;
+		bool Connected = false;
+		do {
+			char IP[50] = "127.0.0.1";
+			int Port = 6666;
 
-		std::cout << "IP : ";
-		std::cin >> IP;
-		std::cout << "Port : ";
-		std::cin >> Port;
+			std::cout << "IP : ";
+			std::cin >> IP;
+			std::cout << "Port : ";
+			std::cin >> Port;
 
-		do {} while (MyClient->ConnectClient(IP, Port) == false);
+			Connected = MyClient->ConnectClient(IP, Port);
+		} while (Connected == false);
+
 		MyClient->SetToListen();
 
 		std::cout << "Dialog : (End for end the program)" << std::endl;
@@ -26,9 +30,10 @@ int main()
 				break;
 			MyClient->SendToServer(Buffer);
 		} while (true);
+
 		std::cout << "Disconnected to server" << std::endl;
 	} while (true);
-	
+
 	MyClient->CloseClient();
 	delete MyClient;
 }
