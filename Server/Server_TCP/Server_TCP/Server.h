@@ -46,9 +46,12 @@ private:
 
 	void CloseClient(SOCKET ClientSocket);
 
-	void SendToClient(SOCKET ClientSocket, sockaddr_in ClientAddr, const char* Data, Server* ThisServer);
+	void SendToClient_Thread(SOCKET ClientSocket, sockaddr_in ClientAddr, const char* Data, Server* ThisServer);
 
-	//To do
-	void BradCast();
+	void BroadCast_Thread(const char * Data, Server* ThisServer);
+
+	void SendToClient(SOCKET ClientSocket, sockaddr_in ClientAddr, const char* Data);
+
+	void Broadcast(const char * Data);
 };
 

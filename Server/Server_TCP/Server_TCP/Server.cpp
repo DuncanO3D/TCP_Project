@@ -184,7 +184,9 @@ void Server::ManageClient(SOCKET ClientSocket, sockaddr_in ClientAddr, Server * 
 			{
 				std::cout << "[" << ClientAddress << ":" << ClientPort << "]" << Buffer + 1 << std::endl;
 
-				ThisServer->SendToClient(ClientSocket, ClientAddr, "T'es mauvais jack", ThisServer);
+				//ThisServer->SendToClient_Thread(ClientSocket, ClientAddr, "T'es mauvais jack", ThisServer);
+				//ThisServer->Broadcast(Buffer + 1);
+				ThisServer->BroadCast_Thread(Buffer + 1, ThisServer);
 			}
 		} while (true);
 
@@ -196,19 +198,45 @@ void Server::CloseClient(SOCKET ClientSocket)
 	m_ClientsMap->erase(ClientSocket);
 }
 
-void Server::SendToClient(SOCKET ClientSocket, sockaddr_in ClientAddr, const char* Data, Server * ThisServer)
+void Server::SendToClient_Thread(SOCKET ClientSocket, sockaddr_in ClientAddr, const char* Data, Server * ThisServer)
 {
 	std::thread([ClientSocket, ClientAddr, Data, ThisServer]()
 	{
-		std::string ClientAddress = Sockets::GetAdress(ClientAddr);
-		unsigned short ClientPort = ntohs(ClientAddr.sin_port);
-
-		char* NetworkData = Sockets::NetworkDataMaker(Data);
-		int DataSize = strlen(NetworkData);
-
-		if (send(ClientSocket, NetworkData, DataSize, 0) == DataSize)
-			std::cout << "to [" << ClientAddress << ":" << ClientPort << "]" << Data << std::endl;
-		else
-			std::cout << "to [" << ClientAddress << ":" << ClientPort << "]Error" << std::endl;
+		char cpyDate[255] = "";
+		strcpy_s(cpyDate, Data);
+		ThisServer->SendToClient(ClientSocket, ClientAddr, Data);
 	}).detach();
+}
+
+void Server::BroadCast_Thread(const char * Data, Server* ThisServer)
+{
+	std::thread([Data, ThisServer]()
+	{
+		char cpyDate[255] = "";
+		strcpy_s(cpyDate, Data);
+		ThisServer->Broadcast(cpyDate);
+	}).detach();
+}
+
+void Server::SendToClient(SOCKET ClientSocket, sockaddr_in ClientAddr, const char * Data)
+{
+	std::string ClientAddress = Sockets::GetAdress(ClientAddr);
+	unsigned short ClientPort = ntohs(ClientAddr.sin_port);
+
+	char* NetworkData = Sockets::NetworkDataMaker(Data);
+	int DataSize = strlen(NetworkData);
+
+	if (send(ClientSocket, NetworkData, DataSize, 0) == DataSize)
+		std::cout << "to [" << ClientAddress << ":" << ClientPort << "]" << NetworkData + 1 << std::endl;
+	else
+		std::cout << "to [" << ClientAddress << ":" << ClientPort << "]Error" << std::endl;
+}
+
+void Server::Broadcast(const char * Data)
+{
+	auto It = m_ClientsMap->begin();
+	for (It = m_ClientsMap->begin(); It != m_ClientsMap->end(); It++)
+	{
+		SendToClient(It->first, It->second, Data);
+	}
 }

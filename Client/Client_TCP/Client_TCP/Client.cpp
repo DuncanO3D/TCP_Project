@@ -116,13 +116,9 @@ void Client::LaunchSendingThread(const char * data, Client* ThisClient)
 		char* NetworkData = Sockets::NetworkDataMaker(data);
 		int DataSize = strlen(NetworkData);
 
-		if (send(ThisClient->m_Socket, NetworkData, DataSize, 0) == DataSize)
+		if (send(ThisClient->m_Socket, NetworkData, DataSize, 0) != DataSize)
 		{
-			std::cout << "to [" << ThisClient->m_ConnectedServer_Address << ":" << ThisClient->m_ConnectedServer_Port << "]" << NetworkData + 1 << std::endl;
-		}
-		else
-		{
-			std::cout << "to [" << ThisClient->m_ConnectedServer_Address << ":" << ThisClient->m_ConnectedServer_Port << "]Error" << std::endl;
+			std::cout << "Sending Error" << std::endl;
 		}
 	});
 
@@ -146,7 +142,7 @@ void Client::LaunchListenThread(Client* ThisClient)
 			}
 			else if (Buffer[0] != strlen(Buffer + 1))
 			{
-				std::cout << "[" << ThisClient->m_ConnectedServer_Address << ":" << ThisClient->m_ConnectedServer_Port << "]Error" << std::endl;
+				std::cout << "[" << ThisClient->m_ConnectedServer_Address << ":" << ThisClient->m_ConnectedServer_Port << "]Listen Error" << std::endl;
 			}
 			else
 			{
