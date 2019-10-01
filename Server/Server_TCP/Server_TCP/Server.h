@@ -12,6 +12,12 @@
 
 #include "Client.h"
 
+//Base Lib for network in c++
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+//Lib Linkage
+#pragma comment(lib, "Ws2_32.lib")
+
 class Server
 {
 public:
@@ -25,9 +31,8 @@ public:
 private:
 	SOCKET m_Socket;
 	sockaddr_in m_Addr;
-
+	
 	std::set<Client*> * m_ClientsSet;
-
 
 	bool InitServer(unsigned int Port);
 	void CloseServer();
@@ -41,18 +46,21 @@ private:
 
 	void AcceptClient(SOCKET ClientSocket, sockaddr_in ClientAddr);
 
-	void ManageClient(Client * ClientStruct, Server* ThisServer);
+	void ManageClient(Client * NewClient, Server* ThisServer);
 
-	void CloseClient(Client * ClientStruct);
+	void CloseClient(Client * ToDisconnect);
 
-	void SendToClient_Thread(Client * ClientStruct, const char* Data, Server* ThisServer);
+	void ToClient_Thread(SOCKET SourceSocket, sockaddr_in SourceAddr, Client * Target, const char* Data, Server* ThisServer);
+	void ToClient_Thread(Client * Source, Client * Target, const char* Data, Server* ThisServer);
 
-	void BroadCast_Thread(const char * Data, Server* ThisServer);
+	void ServerBroadCast_Thread(const char * Data, Server* ThisServer);
+	void ClientBroadCast_Thread(Client * Source, const char * Data, Server* ThisServer);
 
-	void SendToClient(Client * ClientStruct, const char* Data);
+	void ToClient(SOCKET SourceSocket, sockaddr_in SourceAddr, Client * Target, const char* Data);
+	void ToClient(Client * Source, Client * Target, const char* Data);
 
-	void Broadcast(const char * Data);
-
+	void ServerBroadcast(const char * Data);
+	void ClientBroadcast(Client * Source, const char * Data);
 
 
 	void SendJoinMessage(Client * JoiningClient);
