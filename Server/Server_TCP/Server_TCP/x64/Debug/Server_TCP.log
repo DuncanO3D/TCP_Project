@@ -1,0 +1,11 @@
+﻿  Client.cpp
+  Main.cpp
+  Server.cpp
+d:\github_o3d\tcp_project\server\server_tcp\server_tcp\server.cpp(252): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+d:\github_o3d\tcp_project\server\server_tcp\server_tcp\server.cpp(261): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  Sockets.cpp
+d:\github_o3d\tcp_project\server\server_tcp\server_tcp\sockets.cpp(37): warning C4267: 'initializing': conversion from 'size_t' to 'char', possible loss of data
+d:\github_o3d\tcp_project\server\server_tcp\server_tcp\sockets.cpp(50): warning C4267: 'initializing': conversion from 'size_t' to 'char', possible loss of data
+d:\github_o3d\tcp_project\server\server_tcp\server_tcp\sockets.cpp(80): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Generating Code...
+  Server_TCP.vcxproj -> D:\GitHub_O3D\TCP_Project\Server\Server_TCP\x64\Debug\Server_TCP.exe
