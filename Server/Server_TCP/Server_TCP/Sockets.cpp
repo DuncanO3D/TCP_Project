@@ -26,16 +26,15 @@ namespace  Sockets
 	std::string GetAdress(const sockaddr_in & addr)
 	{
 		//Size of a ipv6 for both use (ipv4 and ipv6)
-		char buff[INET6_ADDRSTRLEN] = { 0 };
-
-		return inet_ntop(addr.sin_family, (void*)&addr.sin_addr, buff, INET6_ADDRSTRLEN);
+		char Buffer[INET6_ADDRSTRLEN] = { 0 };
+		return inet_ntop(addr.sin_family, (void*)&addr.sin_addr, Buffer, INET6_ADDRSTRLEN);
 	}
 
 
-	std::string NetworkDataMaker(SOCKET SourceSocket, sockaddr_in SourceAddr, const char * Buffer)
+	std::string NetworkDataMaker(sockaddr_in SourceAddr, std::string Buffer)
 	{
 		std::string Name = GetName(SourceAddr);
-		char Lenght = strlen(Buffer) + Name.size();
+		char Lenght = Buffer.size() + Name.size() + 2;
 
 		std::string NetworkData;
 
@@ -46,13 +45,29 @@ namespace  Sockets
 
 		return NetworkData;
 	}
-	std::string NetworkDataMaker(Client * Source, const char * Buffer)
+	std::string NetworkDataMaker(std::string Name, std::string Buffer)
 	{
-		return NetworkDataMaker(Source->m_Socket, Source->m_Addr, Buffer);
+		char Lenght = Buffer.size() + Name.size() + 2;
+
+		std::string NetworkData;
+
+		NetworkData.push_back(Lenght);
+		NetworkData.append(Name);
+		NetworkData.push_back(NETWORK_DATA_SEPARATOR);
+		NetworkData.append(Buffer);
+
+		return NetworkData;
+	}
+	std::string NetworkDataMaker(Client * Source, std::string Buffer)
+	{
+		return NetworkDataMaker(Source->GetName(), Buffer);
 	}
 
 	std::vector<std::string> GetDatasFromNetworkData(std::string NetworkData)
 	{
+		if (NetworkData.size() < 3)
+			return std::vector<std::string>();
+
 		std::vector<std::string> Datas;
 		std::string Lenght;
 		std::string Name;

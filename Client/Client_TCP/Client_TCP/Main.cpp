@@ -7,40 +7,37 @@ int main()
 	do
 	{
 		bool Connected = false;
-		//do {
-		//	char IP[50] = "127.0.0.1";
-		//	int Port = 6666;
-		//
-		//	std::cout << "IP : ";
-		//	std::cin >> IP;
-		//	std::cout << "Port : ";
-		//	std::cin >> Port;
-		//
-		//	Connected = MyClient->ConnectClient(IP, Port);
-		//} while (Connected == false);
-
-		Connected = MyClient->ConnectClient("127.0.0.1", 6666);
+		do {
+			std::string IP = "127.0.0.1";
+			int Port = 6666;
+			std::string Name = "";
+		
+			std::cout << "IP : ";
+			std::cin >> IP;
+			std::cout << "Port : ";
+			std::cin >> Port;
+			std::cout << "Name : ";
+			std::cin >> Name;
+		
+			Connected = MyClient->ConnectClient(IP, Port, Name);
+			system("CLS");
+		} while (Connected == false);
 
 		MyClient->SetToListen();
-
-
-		//do
-		//{
-		//	MyClient->SendToServer("Test");
-		//	Sleep(250);
-		//} while (true);
-
+		
 		std::cout << "Dialog : (End for end the program)" << std::endl;
 		char Buffer[255] = "";
-		do
+
+		while (MyClient->IsConnected())
 		{
 			std::cin.getline(Buffer, sizeof(Buffer));
 
 			if (strcmp(Buffer, "End") == 0)
 				break;
-			MyClient->SendToServer(Buffer);
-		} while (true);
-
+			if(Buffer[0] != '\0')
+				MyClient->SendToServer(Buffer);
+		}
+		system("CLS");
 		std::cout << "Disconnected to server" << std::endl;
 	} while (true);
 

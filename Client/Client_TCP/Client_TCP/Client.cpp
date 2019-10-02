@@ -11,8 +11,7 @@ Client::~Client()
 	CloseClient();
 }
 
-
-bool Client::ConnectClient(const char * IP, unsigned short Port)
+bool Client::ConnectClient(std::string IP, unsigned short Port, std::string LocalName)
 {
 	if (InitClient() == false)
 		return false;
@@ -21,6 +20,7 @@ bool Client::ConnectClient(const char * IP, unsigned short Port)
 	if (ConnectToServer(IP, Port) == false)
 		return false;
 
+	m_Name = LocalName;
 	m_Connected = true;
 }
 
@@ -31,18 +31,22 @@ void Client::CloseClient()
 	m_Connected = false;
 }
 
-void Client::SendToServer(const char * data)
+void Client::SendToServer(std::string data)
 {
 	if(m_Connected)
-		Send(data);
+		ToServer_Thread(data, this);
 }
 
 void Client::SetToListen()
 {
 	if (m_Connected)
-		Receive(std::vector<char*>());
+		LaunchListenThread(this);
 }
 
+bool Client::IsConnected()
+{
+	return m_Connected;
+}
 
 bool Client::InitClient()
 {	
@@ -68,6 +72,7 @@ bool Client::InitSocket()
 		std::cout << "Socket Initialisation  Error : " << Sockets::GetError() << std::endl;
 		return false;
 	}
+
 	return true;
 }
 
@@ -83,6 +88,7 @@ bool Client::ConnectToServer(const std::string& IP, unsigned short Port)
 		std::cout << "Connection failed : " << Sockets::GetError() << std::endl;
 		return false;
 	}
+
 	std::cout << "Connected : [" << IP << ":" << Port << "]" << std::endl;
 	m_ConnectedServer_Address = IP;
 	m_ConnectedServer_Port = Port;
@@ -96,64 +102,63 @@ void Client::StopClient()
 	Sockets::Release();
 }
 
-
-void Client::Send(const char * data)
+void Client::ToServer_Thread(std::string Data, Client* ThisClient)
 {
-	LaunchSendingThread(data, this);
-}
-
-void Client::Receive(std::vector<char*> buffer)
-{
-	LaunchListenThread(this);
-}
-
-
-
-void Client::LaunchSendingThread(const char * data, Client* ThisClient)
-{
-	std::thread * SendingThread = new std::thread([data, ThisClient]()
+	std::thread * SendingThread = new std::thread([Data, ThisClient]()
 	{
-		char* NetworkData = Sockets::NetworkDataMaker(data);
-		int DataSize = strlen(NetworkData);
-
-		if (send(ThisClient->m_Socket, NetworkData, DataSize, 0) != DataSize)
-		{
-			std::cout << "Sending Error" << std::endl;
-		}
+		ThisClient->ToServer(Data);
 	});
 
 	m_LaunchedThreads.push_back(SendingThread);
 	SendingThread->detach();
 }
+void Client::ToServer(std::string Data)
+{
+	std::string NetworkData = Sockets::NetworkDataMaker(m_Name, Data);
 
+	if (send(m_Socket, NetworkData.c_str(), NetworkData.size(), 0) != NetworkData.size())
+	{
+		std::cout << "Error Size" << std::endl;
+	}
+}
 
 void Client::LaunchListenThread(Client* ThisClient)
 {
 	std::thread * ListenThread = new std::thread([ThisClient]()
 	{		
-		do
-		{
-			char Buffer[255] = "";
-			int BytesReceived = recv(ThisClient->m_Socket, Buffer, 255, 0);
-			if (BytesReceived <= 0)
-			{
-				ThisClient->Disconnected();
-				return;
-			}
-			else if (Buffer[0] != strlen(Buffer + 1))
-			{
-				std::cout << "[" << ThisClient->m_ConnectedServer_Address << ":" << ThisClient->m_ConnectedServer_Port << "]Listen Error" << std::endl;
-			}
-			else
-			{
-				std::cout << "[" << ThisClient->m_ConnectedServer_Address << ":" << ThisClient->m_ConnectedServer_Port << "]" << Buffer + 1 << std::endl;
-			}
-		} while (true);
-
+		ThisClient->Listen();
 	});
 
 	m_LaunchedThreads.push_back(ListenThread);
 	ListenThread->detach();
+}
+void Client::Listen()
+{
+	do 
+	{
+		char Buffer[255] = "";
+		int BytesReceived = recv(m_Socket, Buffer, 255, 0);
+		if (BytesReceived <= 0)
+		{
+			Disconnected();
+			return;
+		}
+
+		std::vector<std::string> Datas = Sockets::GetDatasFromNetworkData(Buffer);
+		if (Datas.size() < 3)
+			return;
+
+		unsigned int DataSize = *Datas[DATA_SIZE].c_str();
+
+		if (DataSize != strlen(Buffer))
+		{
+			std::cout << "[" << Datas[DATA_SOURCE] << "]Error Size" << std::endl;
+		}
+		else
+		{
+			std::cout << "[" << Datas[DATA_SOURCE] << "]" << Datas[DATA_BUFFER] << std::endl;
+		}
+	} while (true);
 }
 
 void Client::Disconnected()
@@ -163,7 +168,6 @@ void Client::Disconnected()
 	m_ConnectedServer_Port = 0;
 	m_Connected = false;
 }
-
 
 void Client::FreeLaunchedTreads()
 {

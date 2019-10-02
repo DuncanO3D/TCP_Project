@@ -1,14 +1,2 @@
-﻿  Client.cpp
-d:\github_o3d\tcp_project\server\server_tcp\server_tcp\client.cpp(16): error C2440: 'return': cannot convert from 'const char *' to 'char *'
-  d:\github_o3d\tcp_project\server\server_tcp\server_tcp\client.cpp(16): note: Conversion loses qualifiers
-  Server.cpp
-  Sockets.cpp
-d:\github_o3d\tcp_project\server\server_tcp\server_tcp\sockets.cpp(37): warning C4267: 'initializing': conversion from 'size_t' to 'char', possible loss of data
-d:\github_o3d\tcp_project\server\server_tcp\server_tcp\sockets.cpp(41): error C2440: 'initializing': cannot convert from 'const char *' to 'char *'
-  d:\github_o3d\tcp_project\server\server_tcp\server_tcp\sockets.cpp(41): note: Conversion loses qualifiers
-d:\github_o3d\tcp_project\server\server_tcp\server_tcp\sockets.cpp(45): error C2664: 'errno_t strcat_s(char *,rsize_t,const char *)': cannot convert argument 3 from 'char' to 'const char *'
-  d:\github_o3d\tcp_project\server\server_tcp\server_tcp\sockets.cpp(45): note: Conversion from integral type to pointer type requires reinterpret_cast, C-style cast or function-style cast
-d:\github_o3d\tcp_project\server\server_tcp\server_tcp\sockets.cpp(66): error C2100: illegal indirection
-d:\github_o3d\tcp_project\server\server_tcp\server_tcp\sockets.cpp(81): error C2371: 'Name': redefinition; different basic types
-  d:\github_o3d\tcp_project\server\server_tcp\server_tcp\sockets.cpp(80): note: see declaration of 'Name'
-  Generating Code...
+﻿  Server.cpp
+  Server_TCP.vcxproj -> D:\GitHub_O3D\TCP_Project\Server\Server_TCP\Debug\Server_TCP.exe

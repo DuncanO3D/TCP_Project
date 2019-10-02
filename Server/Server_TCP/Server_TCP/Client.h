@@ -3,6 +3,8 @@
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 
+#include <string>
+
 struct Client
 {
 public:
@@ -11,6 +13,7 @@ public:
 
 	SOCKET m_Socket;
 	sockaddr_in m_Addr;
+	std::string m_Name;
 
-	char * GetName();
+	std::string GetName();
 };

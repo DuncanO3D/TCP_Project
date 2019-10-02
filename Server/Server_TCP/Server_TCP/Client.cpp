@@ -11,7 +11,10 @@ Client::~Client()
 {
 }
 
-char * Client::GetName()
+std::string Client::GetName()
 {
-	return Sockets::GetName(m_Addr);
+	if (m_Name == "")
+		return Sockets::GetName(m_Addr);
+	else
+		return m_Name;
 }

@@ -13,6 +13,11 @@
 #define NETWORK_DATA_SIZE 234
 #define NETWORK_NAME_SEPARATOR ':'
 #define NETWORK_DATA_SEPARATOR '|'
+#define LOCAL_HOST "127.0.0.1"
+
+#define DATA_SIZE 0
+#define DATA_SOURCE 1
+#define DATA_BUFFER 2
 
 namespace Sockets
 {
@@ -22,8 +27,9 @@ namespace Sockets
 	void CloseSocket(SOCKET socket);
 	std::string GetAdress(const sockaddr_in& addr);
 
-	std::string NetworkDataMaker(SOCKET SourceSocket, sockaddr_in SourceAddr, const char * Buffer);
-	std::string NetworkDataMaker(Client * Source, const char * Buffer);
+	std::string NetworkDataMaker(sockaddr_in SourceAddr, std::string Buffer);
+	std::string NetworkDataMaker(std::string Name, std::string Buffer);
+	std::string NetworkDataMaker(Client * Source, std::string Buffer);
 
 	std::vector<std::string> GetDatasFromNetworkData(std::string NetworkData);
 

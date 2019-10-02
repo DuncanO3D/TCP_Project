@@ -50,17 +50,17 @@ private:
 
 	void CloseClient(Client * ToDisconnect);
 
-	void ToClient_Thread(SOCKET SourceSocket, sockaddr_in SourceAddr, Client * Target, const char* Data, Server* ThisServer);
-	void ToClient_Thread(Client * Source, Client * Target, const char* Data, Server* ThisServer);
+	void ToClient_Thread(sockaddr_in SourceAddr, Client * Target, std::string Data, Server* ThisServer);
+	void ToClient_Thread(Client * Source, Client * Target, std::string Data, Server* ThisServer);
 
-	void ServerBroadCast_Thread(const char * Data, Server* ThisServer);
-	void ClientBroadCast_Thread(Client * Source, const char * Data, Server* ThisServer);
+	void ServerBroadCast_Thread(std::string Data, Server* ThisServer);
+	void ClientBroadCast_Thread(Client * Source, std::string Data, Server* ThisServer);
 
-	void ToClient(SOCKET SourceSocket, sockaddr_in SourceAddr, Client * Target, const char* Data);
-	void ToClient(Client * Source, Client * Target, const char* Data);
+	void ToClient(sockaddr_in SourceAddr, Client * Target, std::string Data);
+	void ToClient(Client * Source, Client * Target, std::string Data);
 
-	void ServerBroadcast(const char * Data);
-	void ClientBroadcast(Client * Source, const char * Data);
+	void ServerBroadcast(std::string Data);
+	void ClientBroadcast(Client * Source, std::string Data);
 
 
 	void SendJoinMessage(Client * JoiningClient);
