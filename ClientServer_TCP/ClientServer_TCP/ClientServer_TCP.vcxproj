@@ -121,6 +121,7 @@
     <ClInclude Include="Identity.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="Sockets.h" />
+    <ClInclude Include="TCP.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp" />

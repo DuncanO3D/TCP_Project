@@ -5,18 +5,20 @@
 
 #include <string>
 
-struct Identity
+namespace TCP
 {
-public:
-	Identity();
-	Identity(SOCKET Socket, sockaddr_in Addr);
-	Identity(SOCKET Socket, sockaddr_in Addr, std::string Name);
-	~Identity();
+	struct Identity
+	{
+	public:
+		Identity();
+		Identity(SOCKET Socket, sockaddr_in Addr);
+		Identity(SOCKET Socket, sockaddr_in Addr, std::string Name);
+		~Identity();
 
-	SOCKET m_Socket;
-	sockaddr_in m_Addr;
-	std::string m_Name;
+		SOCKET m_Socket;
+		sockaddr_in m_Addr;
+		std::string m_Name;
 
-	std::string GetName();
-};
-
+		std::string GetName();
+	};
+}

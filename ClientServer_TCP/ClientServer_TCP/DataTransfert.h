@@ -4,10 +4,12 @@
 #include "DataConvertor.h"
 #include "Identity.h"
 
-namespace DataTransfert
+namespace TCP
 {
-	int SendToTarget(Identity * Source, Identity * Target, std::string Data);
+	namespace DataTransfert
+	{
+		int SendToTarget(Identity * Source, Identity * Target, std::string Data);
 
-	void Broadcast(Identity * Source, std::vector<Identity*> m_Targets, std::string Data, bool toSource = true);
-};
-
+		void Broadcast(Identity * Source, std::vector<Identity*> m_Targets, std::string Data, bool toSource = true);
+	}
+}

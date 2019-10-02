@@ -2,11 +2,13 @@
 
 #include "Sockets.h"
 
-namespace DataConvertor
+namespace TCP
 {
-	std::string NetworkDataMaker(sockaddr_in SourceAddr, std::string Buffer);
-	std::string NetworkDataMaker(std::string Name, std::string Buffer);
+	namespace DataConvertor
+	{
+		std::string NetworkDataMaker(sockaddr_in SourceAddr, std::string Buffer);
+		std::string NetworkDataMaker(std::string Name, std::string Buffer);
 
-	std::vector<std::string> GetDatasFromNetworkData(std::string NetworkData);
-};
-
+		std::vector<std::string> GetDatasFromNetworkData(std::string NetworkData);
+	}
+}

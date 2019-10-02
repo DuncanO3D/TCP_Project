@@ -13,45 +13,54 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\TCP">
+      <UniqueIdentifier>{9fd9e68a-e408-4dee-b5ea-6b59c6d88ff3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\TCP">
+      <UniqueIdentifier>{53547def-2db1-433a-a4e6-767acd8bfb61}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Server.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DataTransfert.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Identity.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Client.h">
+      <Filter>Header Files\TCP</Filter>
     </ClInclude>
     <ClInclude Include="DataConvertor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="DataTransfert.h">
+      <Filter>Header Files\TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="Identity.h">
+      <Filter>Header Files\TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.h">
+      <Filter>Header Files\TCP</Filter>
     </ClInclude>
     <ClInclude Include="Sockets.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\TCP</Filter>
     </ClInclude>
-    <ClInclude Include="Client.h">
+    <ClInclude Include="TCP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Server.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DataTransfert.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Identity.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Client.cpp">
+      <Filter>Source Files\TCP</Filter>
     </ClCompile>
     <ClCompile Include="DataConvertor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="DataTransfert.cpp">
+      <Filter>Source Files\TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="Identity.cpp">
+      <Filter>Source Files\TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>Source Files\TCP</Filter>
     </ClCompile>
     <ClCompile Include="Sockets.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Client.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\TCP</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
