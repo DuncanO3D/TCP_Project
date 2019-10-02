@@ -16,14 +16,16 @@ public:
 	Client();
 	~Client();
 
-	bool ConnectClient(const char* IP, unsigned short Port);
+	bool ConnectClient(std::string IP, unsigned short Port, std::string LocalName);
 	void CloseClient();
 
-	void SendToServer(const char* data);
+	void SendToServer(std::string data);
 	void SetToListen();
+	bool IsConnected();
 
 private:
 	SOCKET m_Socket;	
+	std::string m_Name;
 	bool m_Connected;
 
 	std::string m_ConnectedServer_Address;
@@ -36,13 +38,12 @@ private:
 	bool ConnectToServer(const std::string& IP, unsigned short Port);
 
 	void StopClient();
+		
+	void ToServer_Thread(std::string Data, Client* ThisClient);
+	void ToServer(std::string Data);
 
-	void Send(const char* data);
-	void Receive(std::vector<char*> buffer);
-	
-	void LaunchSendingThread(const char* data, Client* ThisClient);
-	
 	void LaunchListenThread(Client* ThisClient);
+	void Listen();
 
 	void Disconnected();
 

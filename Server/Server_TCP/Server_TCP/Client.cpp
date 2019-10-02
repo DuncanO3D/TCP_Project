@@ -11,12 +11,10 @@ Client::~Client()
 {
 }
 
-char * Client::GetName()
+std::string Client::GetName()
 {
-	char Name[255] = "";
-	strcat_s(Name, Sockets::GetAdress(m_Addr).c_str());
-	char Port[10] = "";
-	_itoa_s(m_Addr.sin_port, Port, 10);
-	strcat_s(Name, Port);
-	return Name;
+	if (m_Name == "")
+		return Sockets::GetName(m_Addr);
+	else
+		return m_Name;
 }
