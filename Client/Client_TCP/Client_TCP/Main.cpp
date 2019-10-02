@@ -19,8 +19,8 @@ int main()
 			std::cout << "Name : ";
 			std::cin >> Name;
 		
-			Connected = MyClient->ConnectClient(IP, Port, Name);
 			system("CLS");
+			Connected = MyClient->ConnectClient(IP, Port, Name);
 		} while (Connected == false);
 
 		MyClient->SetToListen();
