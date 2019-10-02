@@ -87,7 +87,7 @@ bool Server::BindAddr(unsigned int Port)
 	//Addr Binding
 	ULONG Addr;
 	inet_pton(AF_INET, LOCAL_HOST, &Addr);
-	m_Addr.sin_addr.s_addr = Addr;
+	m_Addr.sin_addr.s_addr = 0;
 
 	m_Addr.sin_port = htons(Port);
 	m_Addr.sin_family = AF_INET; //TCP
@@ -98,6 +98,7 @@ bool Server::BindAddr(unsigned int Port)
 		std::cout << "Addr bind Error : " << Sockets::GetError() << std::endl;
 		return false;
 	}
+
 	return true;
 }
 
@@ -148,6 +149,7 @@ void Server::AcceptClient(SOCKET ClientSocket, sockaddr_in ClientAddr)
 			delete NewClient;
 			return;
 		}
+		it++;
 	}
 
 	std::cout << "[" << NewClient->GetName() << "]Connected" << std::endl;
@@ -208,6 +210,7 @@ void Server::CloseClient(Client * ToDisconnect)
 			m_ClientsSet->erase(it);
 			break;
 		}
+		it++;
 	}
 
 	SendLeftMessage(ToDisconnect);
