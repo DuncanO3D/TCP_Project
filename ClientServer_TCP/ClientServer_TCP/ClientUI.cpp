@@ -52,6 +52,7 @@ bool ClientUI::ConnectToServer()
 void ClientUI::Chat()
 {
 	std::string Buffer;
+	std::cout << "\"Close\" to return to the main menu" << std::endl;
 	do
 	{
 		std::getline(std::cin, Buffer);
