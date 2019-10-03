@@ -150,6 +150,7 @@ namespace TCP
 				std::cout << "[" << Datas[DATA_SOURCE] << "]" << Datas[DATA_BUFFER] << std::endl;
 			}
 		} while (true);
+		m_Connected = false;
 	}
 
 	void Client::Disconnected()

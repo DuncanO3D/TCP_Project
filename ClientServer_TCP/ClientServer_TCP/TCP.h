@@ -6,3 +6,8 @@
 #include "Sockets.h"
 #include "DataConvertor.h"
 #include "DataTransfert.h"
+
+namespace TCP
+{
+	bool ContainCharacter(std::string Buffer, std::string Exeption);
+}

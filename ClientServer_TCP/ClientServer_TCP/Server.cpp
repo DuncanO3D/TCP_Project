@@ -5,6 +5,7 @@ namespace TCP
 {
 	Server::Server()
 	{
+		m_On = false;
 	}
 
 	Server::~Server()
@@ -15,7 +16,7 @@ namespace TCP
 	void Server::LaunchServer(unsigned int Port)
 	{
 		InitServer(Port);
-
+		m_On = true;
 		ListenClients();
 	}
 
@@ -29,6 +30,8 @@ namespace TCP
 			delete m_Clients[i];
 		}
 		m_Clients.clear();
+
+		m_On = false;
 	}
 
 	std::vector<std::string> Server::GetConnectedClients()
@@ -113,6 +116,9 @@ namespace TCP
 
 	void Server::ListenClients()
 	{
+		std::cout << "Close the window to shut down the server" << std::endl;
+		std::string Buffer;
+
 		do
 		{
 			sockaddr_in ClientAddr = { 0 };
@@ -128,9 +134,11 @@ namespace TCP
 			else
 			{
 				std::cout << "Socket accept Error : " << Sockets::GetError() << std::endl;
-				return;
-			}
+				break;
+			}			
 		} while (true);
+
+		StopServer();
 	}
 
 

@@ -25,6 +25,8 @@ namespace TCP
 		Identity m_ServerIdentity;
 		std::vector<Identity*> m_Clients;
 
+		bool m_On;
+
 		bool InitServer(unsigned int Port);
 
 		bool InitSocket();

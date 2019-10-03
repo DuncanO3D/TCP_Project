@@ -116,21 +116,30 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Client.h" />
+    <ClInclude Include="ClientUI.h" />
     <ClInclude Include="DataConvertor.h" />
     <ClInclude Include="DataTransfert.h" />
     <ClInclude Include="Identity.h" />
     <ClInclude Include="Server.h" />
+    <ClInclude Include="ServerUI.h" />
     <ClInclude Include="Sockets.h" />
+    <ClInclude Include="StartupUI.h" />
     <ClInclude Include="TCP.h" />
+    <ClInclude Include="UI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="ClientUI.cpp" />
     <ClCompile Include="DataConvertor.cpp" />
     <ClCompile Include="DataTransfert.cpp" />
     <ClCompile Include="Identity.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Server.cpp" />
+    <ClCompile Include="ServerUI.cpp" />
     <ClCompile Include="Sockets.cpp" />
+    <ClCompile Include="StartupUI.cpp" />
+    <ClCompile Include="TCP.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
