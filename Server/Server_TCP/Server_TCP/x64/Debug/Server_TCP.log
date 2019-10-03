@@ -1,4 +1,0 @@
-﻿  Server.cpp
-d:\github_o3d\tcp_project\server\server_tcp\server_tcp\server.cpp(255): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-d:\github_o3d\tcp_project\server\server_tcp\server_tcp\server.cpp(264): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  Server_TCP.vcxproj -> D:\GitHub_O3D\TCP_Project\Server\Server_TCP\x64\Debug\Server_TCP.exe
