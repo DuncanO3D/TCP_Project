@@ -57,6 +57,7 @@ namespace TCP
 		if (Sockets::Start() == false)
 		{
 			std::cout << "Winsock Initialisation Error : " << Sockets::GetError() << std::endl;
+			system("PAUSE");
 			return false;
 		}
 
@@ -73,6 +74,7 @@ namespace TCP
 		if (m_ServerIdentity.m_Socket == INVALID_SOCKET)
 		{
 			std::cout << "Socket Initialisation  Error : " << Sockets::GetError() << std::endl;
+			system("PAUSE");
 			return false;
 		}
 
@@ -88,6 +90,7 @@ namespace TCP
 		if (connect(m_ServerIdentity.m_Socket, (sockaddr*)&m_ServerIdentity.m_Addr, sizeof(m_ServerIdentity.m_Addr)))
 		{
 			std::cout << "Connection failed : " << Sockets::GetError() << std::endl;
+			system("PAUSE");
 			return false;
 		}
 
@@ -132,6 +135,7 @@ namespace TCP
 			if (BytesReceived <= 0)
 			{
 				Disconnected();
+				system("PAUSE");
 				return;
 			}
 

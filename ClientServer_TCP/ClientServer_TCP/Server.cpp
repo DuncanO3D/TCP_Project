@@ -52,6 +52,7 @@ namespace TCP
 		if (Sockets::Start() == false)
 		{
 			std::cout << "Winsock Initialisation Error : " << Sockets::GetError() << std::endl;
+			system("PAUSE");
 			return false;
 		}
 
@@ -78,6 +79,7 @@ namespace TCP
 		if (m_ServerIdentity.m_Socket == INVALID_SOCKET)
 		{
 			std::cout << "Socket Initialisation  Error : " << Sockets::GetError() << std::endl;
+			system("PAUSE");
 			return false;
 		}
 		return true;
@@ -86,7 +88,7 @@ namespace TCP
 	bool Server::BindAddr(unsigned int Port)
 	{
 		//Addr Binding
-		m_ServerIdentity.m_Addr.sin_addr.s_addr = 0;
+		m_ServerIdentity.m_Addr.sin_addr.s_addr = htonl(INADDR_ANY);
 		m_ServerIdentity.m_Addr.sin_port = htons(Port);
 		m_ServerIdentity.m_Addr.sin_family = AF_INET; //TCP
 
@@ -94,6 +96,7 @@ namespace TCP
 		if (error != 0)
 		{
 			std::cout << "Addr bind Error : " << Sockets::GetError() << std::endl;
+			system("PAUSE");
 			return false;
 		}
 
@@ -108,6 +111,7 @@ namespace TCP
 		if (error != 0)
 		{
 			std::cout << "Server listen Error : " << Sockets::GetError() << std::endl;
+			system("PAUSE");
 			return false;
 		}
 		return true;
@@ -134,6 +138,7 @@ namespace TCP
 			else
 			{
 				std::cout << "Socket accept Error : " << Sockets::GetError() << std::endl;
+				system("PAUSE");
 				break;
 			}			
 		} while (true);
