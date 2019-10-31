@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace TCP
+namespace Network
 {
 	struct Identity
 	{

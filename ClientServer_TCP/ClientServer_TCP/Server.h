@@ -22,8 +22,8 @@ namespace TCP
 		std::vector<std::string> GetConnectedClients();
 
 	private:
-		Identity m_ServerIdentity;
-		std::vector<Identity*> m_Clients;
+		Network::Identity m_ServerIdentity;
+		std::vector<Network::Identity*> m_Clients;
 
 		bool m_On;
 
@@ -38,16 +38,16 @@ namespace TCP
 
 		void AcceptClient(SOCKET ClientSocket, sockaddr_in ClientAddr);
 
-		void ManageClient(Identity * NewClient, Server* ThisServer);
+		void ManageClient(Network::Identity * NewClient, Server* ThisServer);
 
-		void CloseClient(Identity * ToDisconnect);
+		void CloseClient(Network::Identity * ToDisconnect);
 
-		void Send_Thread(Identity * Source, Identity * Target, std::string Data, Server* ThisServer);
+		void Send_Thread(Network::Identity * Source, Network::Identity * Target, std::string Data, Server* ThisServer);
 
-		void BroadCast_Thread(Identity * Source, std::string Data, Server* ThisServer);
+		void BroadCast_Thread(Network::Identity * Source, std::string Data, Server* ThisServer);
 
-		void SendJoinMessage(Identity * JoiningClient);
-		void SendLeftMessage(Identity * LeavingClient);
+		void SendJoinMessage(Network::Identity * JoiningClient);
+		void SendLeftMessage(Network::Identity * LeavingClient);
 		void SendShutDownMessage();
 	};
 }

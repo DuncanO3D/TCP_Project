@@ -3,6 +3,7 @@
 ServerUI::ServerUI() : UI()
 {
 	m_Server = new TCP::Server();
+	m_ServerUDP = new UDP::Server();
 }
 
 ServerUI::~ServerUI()
@@ -11,6 +12,11 @@ ServerUI::~ServerUI()
 	{
 		m_Server->StopServer();
 		delete m_Server;
+	}
+	if (m_ServerUDP != nullptr)
+	{
+		m_ServerUDP->StopServer();
+		delete m_ServerUDP;
 	}
 }
 
@@ -36,7 +42,8 @@ void ServerUI::DrawChooseParameter()
 
 void ServerUI::LaunchServer()
 {	
-	m_Server->LaunchServer(m_Port);
+	//m_Server->LaunchServer(m_Port);
+	m_ServerUDP->LaunchServer(m_Port);
 }
 
 void ServerUI::DrawEndServer()

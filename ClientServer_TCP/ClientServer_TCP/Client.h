@@ -25,8 +25,8 @@ namespace TCP
 		bool IsConnected();
 
 	private:
-		Identity m_ClientIdentity;
-		Identity m_ServerIdentity;
+		Network::Identity m_ClientIdentity;
+		Network::Identity m_ServerIdentity;
 		bool m_Connected;
 
 		std::vector<std::thread*> m_LaunchedThreads;

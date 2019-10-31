@@ -18,15 +18,13 @@
 #define DATA_SOURCE 1
 #define DATA_BUFFER 2
 
-namespace TCP
+
+namespace Sockets
 {
-	namespace Sockets
-	{
-		bool Start();
-		void Release();
-		int GetError();
-		void CloseSocket(SOCKET socket);
-		std::string GetAdress(const sockaddr_in& addr);
-		std::string GetName(sockaddr_in SourceAddr);
-	}
+	bool Start();
+	void Release();
+	int GetError();
+	void CloseSocket(SOCKET socket);
+	std::string GetAdress(const sockaddr_in& addr);
+	std::string GetName(sockaddr_in SourceAddr);
 }

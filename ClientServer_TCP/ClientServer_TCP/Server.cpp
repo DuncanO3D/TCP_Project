@@ -149,7 +149,7 @@ namespace TCP
 
 	void Server::AcceptClient(SOCKET ClientSocket, sockaddr_in ClientAddr)
 	{
-		Identity * NewClient = new Identity();
+		Network::Identity * NewClient = new Network::Identity();
 		NewClient->m_Socket = ClientSocket;
 		NewClient->m_Addr = ClientAddr;
 
@@ -173,7 +173,7 @@ namespace TCP
 	}
 
 
-	void Server::ManageClient(Identity * NewClient, Server * ThisServer)
+	void Server::ManageClient(Network::Identity * NewClient, Server * ThisServer)
 	{
 		std::thread([NewClient, ThisServer]()
 		{
@@ -209,7 +209,7 @@ namespace TCP
 		}).detach();
 	}
 
-	void Server::CloseClient(Identity * ToDisconnect)
+	void Server::CloseClient(Network::Identity * ToDisconnect)
 	{
 		for (unsigned int i = 0; i < m_Clients.size(); i++)
 		{
@@ -226,7 +226,7 @@ namespace TCP
 	}
 
 
-	void Server::Send_Thread(Identity * Source, Identity * Target, std::string Data, Server * ThisServer)
+	void Server::Send_Thread(Network::Identity * Source, Network::Identity * Target, std::string Data, Server * ThisServer)
 	{
 		std::thread([Source, Target, Data, ThisServer]()
 		{
@@ -234,7 +234,7 @@ namespace TCP
 		}).detach();
 	}
 
-	void Server::BroadCast_Thread(Identity * Source, std::string Data, Server * ThisServer)
+	void Server::BroadCast_Thread(Network::Identity * Source, std::string Data, Server * ThisServer)
 	{
 		std::thread([Source, Data, ThisServer]()
 		{
@@ -243,13 +243,13 @@ namespace TCP
 	}
 
 
-	void Server::SendJoinMessage(Identity * JoiningClient)
+	void Server::SendJoinMessage(Network::Identity * JoiningClient)
 	{
 		std::string JoiningMessage = JoiningClient->GetName();
 		JoiningMessage.append(" has join");
 		BroadCast_Thread(&m_ServerIdentity, JoiningMessage, this);
 	}
-	void Server::SendLeftMessage(Identity * LeavingClient)
+	void Server::SendLeftMessage(Network::Identity * LeavingClient)
 	{
 		std::string LeavingMessage = LeavingClient->GetName();
 		LeavingMessage.append(" has left");

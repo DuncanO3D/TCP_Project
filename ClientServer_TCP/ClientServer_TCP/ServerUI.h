@@ -2,6 +2,7 @@
 #include "UI.h"
 
 #include "TCP.h"
+#include "UDP.h"
 
 class ServerUI : public UI
 {
@@ -14,6 +15,7 @@ public:
 private:
 	unsigned int m_Port;
 	TCP::Server * m_Server;
+	UDP::Server * m_ServerUDP;
 
 	void DrawEntrySpeech();
 	void DrawChooseParameter();

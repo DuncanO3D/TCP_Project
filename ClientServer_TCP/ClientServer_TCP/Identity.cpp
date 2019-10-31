@@ -2,7 +2,7 @@
 
 #include "Sockets.h"
 
-namespace TCP
+namespace Network
 {
 	Identity::Identity()
 	{

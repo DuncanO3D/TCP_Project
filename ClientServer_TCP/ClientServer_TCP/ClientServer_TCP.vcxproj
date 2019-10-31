@@ -122,9 +122,11 @@
     <ClInclude Include="Identity.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="ServerUI.h" />
+    <ClInclude Include="Server_UDP.h" />
     <ClInclude Include="Sockets.h" />
     <ClInclude Include="StartupUI.h" />
     <ClInclude Include="TCP.h" />
+    <ClInclude Include="UDP.h" />
     <ClInclude Include="UI.h" />
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +138,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="ServerUI.cpp" />
+    <ClCompile Include="Server_UDP.cpp" />
     <ClCompile Include="Sockets.cpp" />
     <ClCompile Include="StartupUI.cpp" />
     <ClCompile Include="TCP.cpp" />
