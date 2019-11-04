@@ -42,8 +42,8 @@ void ServerUI::DrawChooseParameter()
 
 void ServerUI::LaunchServer()
 {	
-	//m_Server->LaunchServer(m_Port);
-	m_ServerUDP->LaunchServer(m_Port);
+	m_Server->LaunchServer(m_Port);
+	//m_ServerUDP->LaunchServer(m_Port);
 }
 
 void ServerUI::DrawEndServer()

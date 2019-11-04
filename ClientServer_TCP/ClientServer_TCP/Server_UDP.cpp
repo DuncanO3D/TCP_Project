@@ -126,9 +126,8 @@ namespace UDP
 			}
 
 			std::cout << std::string(Buf) << std::endl;
-
-			
-			int send_len = sendto(m_ServerIdentity.m_Socket, Buf, recv_len, 0, reinterpret_cast<sockaddr *>(&from), slen);
+					   			
+			int send_len = sendto(m_ServerIdentity.m_Socket, Buf, 255, 0, reinterpret_cast<sockaddr *>(&from), slen);
 			if (send_len <= 0)
 			{
 				std::cout << "Socket listen Error : " << Sockets::GetError() << std::endl;
