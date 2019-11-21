@@ -41,4 +41,5 @@ void UI::TrySafeDestroyChild()
 {
 	if (m_Child != nullptr)
 		delete m_Child;
+	m_Child = nullptr;
 }

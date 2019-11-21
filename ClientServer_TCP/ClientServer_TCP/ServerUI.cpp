@@ -11,12 +11,16 @@ ServerUI::~ServerUI()
 	if (m_Server != nullptr)
 	{
 		m_Server->StopServer();
-		delete m_Server;
+		if (m_Server != nullptr)
+			delete m_Server;
+		m_Server = nullptr;
 	}
 	if (m_ServerUDP != nullptr)
 	{
 		m_ServerUDP->StopServer();
-		delete m_ServerUDP;
+		if (m_ServerUDP != nullptr)
+			delete m_ServerUDP;
+		m_ServerUDP = nullptr;
 	}
 }
 
@@ -41,7 +45,7 @@ void ServerUI::DrawChooseParameter()
 }
 
 void ServerUI::LaunchServer()
-{	
+{
 	m_Server->LaunchServer(m_Port);
 	//m_ServerUDP->LaunchServer(m_Port);
 }

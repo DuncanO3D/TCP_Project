@@ -9,6 +9,7 @@ ClientUI::~ClientUI()
 {
 	if (m_Client != nullptr)
 		delete m_Client;
+	m_Client = nullptr;
 }
 
 void ClientUI::DrawUI()
@@ -41,12 +42,16 @@ void ClientUI::DrawChooseParameter()
 			std::cout << "Connection failed" << std::endl;
 		else
 			m_Client->SetToListen();
+
+		std::cin.clear();
 	} while (Connected == false);
 }
 
 bool ClientUI::ConnectToServer()
 {
-	return m_Client->ConnectClient(m_IP, m_Port, m_Name);
+	if (m_Client != nullptr)
+		return m_Client->ConnectClient(m_IP, m_Port, m_Name);
+	return false;
 }
 
 void ClientUI::Chat()

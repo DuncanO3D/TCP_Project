@@ -223,6 +223,7 @@ namespace TCP
 		SendLeftMessage(ToDisconnect);
 
 		delete ToDisconnect;
+		ToDisconnect = nullptr;
 	}
 
 
